@@ -1,0 +1,2653 @@
+---
+title: "Detailed Results"
+subtitle: "Can reflective diary-writing increase sufficiency-oriented consumption? A longitudinal intervention addressing the role of basic psychological needs, well-being, and time-affluence"
+author: "Marlis Wullenkord and Josephine Tröger"
+date: '2020-12-29'
+output:
+  html_document:
+    fig_height: 9
+    fig_width: 16
+    highlight: default
+    number_sections: yes
+    theme: yeti
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+```{r}
+# Data cleaning
+## Loading packages I
+
+library(psych)
+library(dplyr)
+library(car)
+library(janitor)
+```
+
+```{r}
+## T1
+### Loading data
+
+d1 <- read.csv("Analysis_Troeger_et_al_2022/Datasets/Pre.csv", header = TRUE, sep = ",")
+```
+
+```{r}
+### Preparing the data
+
+length(unique(d1$case)) == nrow(d1)
+which(duplicated(d1$case)) 
+d2 <- d1[!duplicated(d1$case),] 
+d2.1 <- d1[duplicated(d1$case),] 
+which(d2$case == 103)
+d3 <- d2 [-c(103), ] 
+d4 <- subset(d3, case != "NA") 
+data <- d4
+```
+
+```{r}
+### Define Missings 
+
+is.na(data$age.t1) <- which(data$age.t1== 0)
+```
+
+```{r}
+### Calculating means T1
+#### Subjective well-being 
+# Inverting items
+
+data$swb7.t1.i <- recode (data$swb7.t1, '1=5; 2=4; 4=2; 5=1')
+data$swb8.t1.i <- recode (data$swb8.t1, '1=5; 2=4; 4=2; 5=1')
+data$swb9.t1.i <- recode (data$swb9.t1, '1=5; 2=4; 4=2; 5=1')
+data$swb10.t1.i <- recode (data$swb10.t1, '1=5; 2=4; 4=2; 5=1')
+data$swb11.t1.i <- recode (data$swb11.t1, '1=5; 2=4; 4=2; 5=1')
+data$swb12.t1.i <- recode (data$swb12.t1, '1=5; 2=4; 4=2; 5=1')
+```
+
+```{r}
+#Calculating mean subjective well-being 
+
+data$swb.t1 <- rowMeans (data [c("swb1.t1", "swb2.t1", "swb3.t1", "swb4.t1", 
+                                 "swb5.t1", "swb6.t1", "swb7.t1.i", "swb8.t1.i",
+                                 "swb9.t1.i", "swb10.t1.i", "swb11.t1.i", "swb12.t1.i")]) 
+```
+
+```{r}
+#### Time affluence 
+#Inverting items
+
+data$t1.t1.i <- recode (data$t1.t1, '1=5; 2=4; 4=2; 5=1')
+data$t3.t1.i <- recode (data$t3.t1, '1=5; 2=4; 4=2; 5=1')
+data$t6.t1.i <- recode (data$t6.t1, '1=5; 2=4; 4=2; 5=1')
+data$t8.t1.i <- recode (data$t8.t1, '1=5; 2=4; 4=2; 5=1')
+```
+
+```{r}
+#Calculating mean time affluence
+
+data$t.t1 <- rowMeans (data [c("t1.t1.i", "t2.t1", "t3.t1.i", "t4.t1",
+                               "t5.t1", "t6.t1.i", "t7.t1", "t8.t1.i")])
+```
+
+```{r}
+#### Basic psychological needs
+#Inverting items
+
+data$gbk16.t1.i <- recode (data$gbk16.t1, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk17.t1.i <- recode (data$gbk17.t1, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk18.t1.i <- recode (data$gbk18.t1, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+
+data$gbk3.t1.i <- recode (data$gbk3.t1, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk4.t1.i <- recode (data$gbk4.t1, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk5.t1.i <- recode (data$gbk5.t1, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+
+data$gbk8.t1.i <- recode (data$gbk8.t1, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk10.t1.i <- recode (data$gbk10.t1, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk11.t1.i <- recode (data$gbk11.t1, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+```
+
+```{r}
+#Calculating means basic psychological needs
+
+data$gbk.t1.r <- rowMeans (data [c("gbk13.t1", "gbk14.t1", "gbk15.t1",
+                                   "gbk16.t1.i", "gbk17.t1.i", "gbk18.t1.i")]) #relatedness satisfaction
+
+data$gbk.t1.a <- rowMeans (data [c("gbk1.t1", "gbk2.t1", "gbk6.t1",
+                                   "gbk3.t1.i", "gbk4.t1.i", "gbk5.t1.i")])    #autonomy satisfaction
+
+data$gbk.t1.c <- rowMeans (data [c("gbk9.t1", "gbk12.t1",
+                                   "gbk8.t1.i", "gbk10.t1.i", "gbk11.t1.i")])  #competence satisfaction
+
+
+data$gbk.t1.s <- rowMeans (data [c("gbk13.t1", "gbk14.t1", "gbk15.t1",
+                               "gbk16.t1.i", "gbk17.t1.i", "gbk18.t1.i",
+                               "gbk1.t1", "gbk2.t1", "gbk6.t1",
+                               "gbk3.t1.i", "gbk4.t1.i", "gbk5.t1.i",
+                               "gbk9.t1", "gbk12.t1",
+                               "gbk8.t1.i", "gbk10.t1.i", "gbk11.t1.i")])      #basic needs satisfaction
+```
+
+
+```{r}
+#### Sufficiency orientation
+#Inverting items
+
+data$so4.t1.i <- recode (data$so4.t1, '1=5; 2=4; 4=2; 5=1')
+```
+
+```{r}
+#z-standardizing items
+
+data$sv1.t1.z <- scale(data$sv1.t1)
+data$sv2.t1.z <- scale(data$sv2.t1)
+data$sv3.t1.z <- scale(data$sv3.t1)
+data$sv4.t1.z <- scale(data$sv4.t1)
+data$sv5.t1.z <- scale(data$sv5.t1)
+data$sv6.t1.z <- scale(data$sv6.t1)
+data$sv12.t1.z <- scale(data$sv12.t1)
+data$sv13.t1.z <- scale(data$sv13.t1)
+data$sv14.t1.z <- scale(data$sv14.t1)
+data$sv15.t1.z <- scale(data$sv15.t1)
+data$sv16.t1.z <- scale(data$sv16.t1)
+data$sv17.t1.z <- scale(data$sv17.t1)
+data$sv18.t1.z <- scale(data$sv18.t1)
+
+data$so1.t1.z <- scale(data$so1.t1)
+data$so2.t1.z <- scale(data$so2.t1)
+data$so3.t1.z <- scale(data$so3.t1)
+data$so4.t1.i.z <- scale(data$so4.t1.i)
+data$so5.t1.z <- scale(data$so5.t1)
+data$so6.t1.z <- scale(data$so6.t1)
+data$so7.t1.z <- scale(data$so7.t1)
+data$so8.t1.z <- scale(data$so8.t1)
+data$so9.t1.z <- scale(data$so9.t1)
+data$so10.t1.z <- scale(data$so10.t1)
+data$so11.t1.z <- scale(data$so11.t1)
+data$so12.t1.z <- scale(data$so12.t1)
+data$so13.t1.z <- scale(data$so13.t1)
+```
+
+```{r}
+#Calculating mean sufficiency orientation
+
+data$s.t1 <- rowMeans (data [c("so1.t1.z", "so2.t1.z", "so4.t1.i.z", "so5.t1.z",
+                               "so6.t1.z", "so8.t1.z", "so9.t1.z", "so10.t1.z",
+                               "so11.t1.z", "so12.t1.z", "so13.t1.z",
+                               "sv1.t1.z", "sv2.t1.z", "sv3.t1.z", "sv4.t1.z",
+                               "sv5.t1.z", "sv6.t1.z",
+                               "sv12.t1.z", "sv13.t1.z", "sv14.t1.z", "sv15.t1.z",
+                               "so7.t1.z",
+                               "sv16.t1.z", "sv17.t1.z", "sv18.t1.z", "so3.t1.z")])
+```
+
+```{r}
+#### Self-reflection
+
+data$sr.t1 <- rowMeans (data [c("sr1.t1", "sr2.t1", "sr3.t1", "sr4.t1",
+                                "sr5.t1", "sr7.t1")]) 
+```
+
+```{r}
+#### Standardized scales T1
+
+# Sufficiency orientation
+data$s.t1.z <- scale(data [,"s.t1"])
+
+# Subjective wellbeing
+data$swb.t1.z <- scale(data [,"swb.t1"])
+
+# Basic psychological needs
+data$gbk.t1.s.z <- scale(data [,"gbk.t1.s"])
+
+# Time affluence
+data$t.t1.z <- scale(data [,"t.t1"])
+
+# Self-reflection
+data$sr.t1.z <- scale(data [,"sr.t1"])
+```
+
+```{r}
+### Calculating outliers T1
+
+d.t1 <- filter (data, ok.t1 == 1 & dauer.t1 > 0 & (check.t1 == 4 | is.na(check.t1))) 
+
+d.t1.a <- filter(d.t1, s.t1.z <= 2.5 & s.t1.z >= (-2.5)
+                & swb.t1.z <= 2.5 & swb.t1.z >= (-2.5)
+                & gbk.t1.s.z  <= 2.5 & gbk.t1.s.z >= (-2.5) 
+                & t.t1.z  <= 2.5 & t.t1.z >= (-2.5)
+                & sr.t1.z <= 2.5 & sr.t1.z >= (-2.5))
+```
+
+```{r}
+### Renaming dataset T1
+
+table_pre <- d.t1.a
+```
+
+```{r}
+## T2
+### Loading data
+
+table1 <- read.csv("Analysis_Troeger_et_al_2022/Datasets/EG_Post.csv", header = TRUE, sep = ",")
+table2 <- read.csv("Analysis_Troeger_et_al_2022/Datasets/CG_Post.csv", header = TRUE, sep = ",")
+table3 <- read.csv("Analysis_Troeger_et_al_2022/Datasets/Check.csv", header = TRUE, sep = ";")
+```
+
+```{r}
+### Merging data
+
+d1 <- merge(table1, table2, all=TRUE) 
+d2 <- full_join(d1, table3, by = c ("case", "bed")) 
+```
+
+```{r}
+### Preparing the data
+
+length(unique(d2$case)) == nrow(d2)
+which(duplicated(d2$case)) 
+d3 <- d2[!duplicated(d2$case),] 
+d3.1 <- d2[duplicated(d2$case),]
+d4 <- subset(d3, case != "NA") 
+data <- d4
+```
+
+```{r}
+### Define Missings 
+
+is.na(data$age.t2) <- which(data$age.t2== 0) 
+```
+
+```{r}
+### Calculating means T2
+#### Subjective well-being
+#Inverting items
+
+data$swb7.t2.i <- recode (data$swb7.t2, '1=5; 2=4; 4=2; 5=1')
+data$swb8.t2.i <- recode (data$swb8.t2, '1=5; 2=4; 4=2; 5=1')
+data$swb9.t2.i <- recode (data$swb9.t2, '1=5; 2=4; 4=2; 5=1')
+data$swb10.t2.i <- recode (data$swb10.t2, '1=5; 2=4; 4=2; 5=1')
+data$swb11.t2.i <- recode (data$swb11.t2, '1=5; 2=4; 4=2; 5=1')
+data$swb12.t2.i <- recode (data$swb12.t2, '1=5; 2=4; 4=2; 5=1')
+```
+
+```{r}
+#Calculating mean subjective well-being
+
+data$swb.t2 <- rowMeans (data [c("swb1.t2", "swb2.t2", "swb3.t2", "swb4.t2", 
+                                 "swb5.t2", "swb6.t2", "swb7.t2.i", "swb8.t2.i",
+                                 "swb9.t2.i", "swb10.t2.i", "swb11.t2.i", "swb12.t2.i")]) 
+```
+
+```{r}
+#### Time affluence
+#Inverting items
+
+data$t1.t2.i <- recode (data$t1.t2, '1=5; 2=4; 4=2; 5=1')
+data$t3.t2.i <- recode (data$t3.t2, '1=5; 2=4; 4=2; 5=1')
+data$t6.t2.i <- recode (data$t6.t2, '1=5; 2=4; 4=2; 5=1')
+data$t8.t2.i <- recode (data$t8.t2, '1=5; 2=4; 4=2; 5=1')
+```
+
+```{r}
+#Calculating mean time affluence
+
+data$t.t2 <- rowMeans (data [c("t1.t2.i", "t2.t2", "t3.t2.i", "t4.t2",
+                               "t5.t2", "t6.t2.i", "t7.t2", "t8.t2.i")])
+```
+
+```{r}
+#### Basic psychological needs
+#Inverting items
+
+data$gbk16.t2.i <- recode (data$gbk16.t2, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk17.t2.i <- recode (data$gbk17.t2, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk18.t2.i <- recode (data$gbk18.t2, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+
+data$gbk3.t2.i <- recode (data$gbk3.t2, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk4.t2.i <- recode (data$gbk4.t2, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk5.t2.i <- recode (data$gbk5.t2, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+
+data$gbk8.t2.i <- recode (data$gbk8.t2, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk10.t2.i <- recode (data$gbk10.t2, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk11.t2.i <- recode (data$gbk11.t2, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+```
+
+```{r}
+#Calculating means basic psychological needs
+
+data$gbk.t2.r <- rowMeans (data [c("gbk13.t2", "gbk14.t2", "gbk15.t2",
+                                   "gbk16.t2.i", "gbk17.t2.i", "gbk18.t2.i")])   #relatedness satisfaction
+
+data$gbk.t2.a <- rowMeans (data [c("gbk1.t2", "gbk2.t2", "gbk6.t2",
+                                   "gbk3.t2.i", "gbk4.t2.i", "gbk5.t2.i")])    #autonomy satisfaction
+
+data$gbk.t2.c <- rowMeans (data [c("gbk9.t2", "gbk12.t2",
+                                   "gbk8.t2.i", "gbk10.t2.i", "gbk11.t2.i")])  #competence satisfaction
+
+
+data$gbk.t2.s <- rowMeans (data [c("gbk13.t2", "gbk14.t2", "gbk15.t2",
+                                   "gbk16.t2.i", "gbk17.t2.i", "gbk18.t2.i",
+                                   "gbk1.t2", "gbk2.t2", "gbk6.t2",
+                                   "gbk3.t2.i", "gbk4.t2.i", "gbk5.t2.i",
+                                   "gbk9.t2", "gbk12.t2",
+                                   "gbk8.t2.i", "gbk10.t2.i", "gbk11.t2.i")])  #basic needs satisfaction
+```
+
+```{r}
+#### Sufficiency orientation
+#Inverting items
+
+data$so4.t2.i <- recode (data$so4.t2, '1=5; 2=4; 4=2; 5=1')
+```
+
+```{r}
+#z-standardizing items
+
+data$sv1.t2.z <- scale(data$sv1.t2)
+data$sv2.t2.z <- scale(data$sv2.t2)
+data$sv3.t2.z <- scale(data$sv3.t2)
+data$sv4.t2.z <- scale(data$sv4.t2)
+data$sv5.t2.z <- scale(data$sv5.t2)
+data$sv6.t2.z <- scale(data$sv6.t2)
+data$sv12.t2.z <- scale(data$sv12.t2)
+data$sv13.t2.z <- scale(data$sv13.t2)
+data$sv14.t2.z <- scale(data$sv14.t2)
+data$sv15.t2.z <- scale(data$sv15.t2)
+data$sv16.t2.z <- scale(data$sv16.t2)
+data$sv17.t2.z <- scale(data$sv17.t2)
+data$sv18.t2.z <- scale(data$sv18.t2)
+
+data$so1.t2.z <- scale(data$so1.t2)
+data$so2.t2.z <- scale(data$so2.t2)
+data$so3.t2.z <- scale(data$so3.t2)
+data$so4.t2.i.z <- scale(data$so4.t2.i)
+data$so5.t2.z <- scale(data$so5.t2)
+data$so6.t2.z <- scale(data$so6.t2)
+data$so7.t2.z <- scale(data$so7.t2)
+data$so8.t2.z <- scale(data$so8.t2)
+data$so9.t2.z <- scale(data$so9.t2)
+data$so10.t2.z <- scale(data$so10.t2)
+data$so11.t2.z <- scale(data$so11.t2)
+data$so12.t2.z <- scale(data$so12.t2)
+data$so13.t2.z <- scale(data$so13.t2)
+```
+
+```{r}
+#Calculating mean sufficiency orientation
+
+data$s.t2 <- rowMeans (data [c("so1.t2.z", "so2.t2.z", "so4.t2.i.z", "so5.t2.z",
+                               "so6.t2.z", "so8.t2.z", "so9.t2.z", "so10.t2.z",
+                               "so11.t2.z", "so12.t2.z", "so13.t2.z",
+                               "sv1.t2.z", "sv2.t2.z", "sv3.t2.z", "sv4.t2.z",
+                               "sv5.t2.z", "sv6.t2.z",
+                               "sv12.t2.z", "sv13.t2.z", "sv14.t2.z", "sv15.t2.z",
+                               "so7.t2.z",
+                               "sv16.t2.z", "sv17.t2.z", "sv18.t2.z", "so3.t2.z")])    
+```
+
+```{r}
+#### Self-reflection
+
+data$sr.t2 <- rowMeans (data [c("sr1.t2", "sr2.t2", "sr3.t2", "sr4.t2",
+                                "sr5.t2", "sr7.t2")]) 
+```
+
+```{r}
+#### Standardized scales T2
+
+# Sufficiency orientation
+data$s.t2.z <- scale(data [,"s.t2"])
+
+# Subjective wellbeing
+data$swb.t2.z <- scale(data [,"swb.t2"])
+
+# Basiy psychological needs
+data$gbk.t2.s.z <- scale(data [,"gbk.t2.s"])
+
+# Time affluence
+data$t.t2.z <- scale(data [,"t.t2"])
+
+# Self-reflection
+data$sr.t2.z <- scale(data [,"sr.t2"])
+```
+
+```{r}
+### Calculating outliers
+
+d.t2 <- filter(data, ok.t2 == 1 & dauer.t2 > 0 & sumcheck > 3 & (check.t2 == 4 | is.na(check.t2))) 
+
+d.t2.a <- filter(d.t2, s.t2.z <= 2.5 & s.t2.z >= (-2.5)
+                & swb.t2.z <= 2.5 & swb.t2.z >= (-2.5) 
+                & gbk.t2.s.z  <= 2.5 & gbk.t2.s.z >= (-2.5) 
+                & t.t2.z  <= 2.5 & t.t2.z >= (-2.5)
+                & sr.t2.z  <= 2.5 & sr.t2.z >= (-2.5)) 
+```
+
+```{r}
+### Renaming dataset T2
+
+table_post <- d.t2.a
+```
+
+
+```{r}
+## T3
+### Loading data
+
+d1 <- read.csv("Analysis_Troeger_et_al_2022/Datasets/FollowUp.csv", header = TRUE, sep = ",")
+```
+
+```{r}
+### Preparing the data
+
+length(unique(d1$case)) == nrow(d1)
+which(duplicated(d1$case)) 
+d2 <- d1[!duplicated(d1$case),] 
+d2.1 <- d1[duplicated(d1$case),]
+d3 <- subset(d2, case != "NA")
+data <- d3
+```
+
+```{r}
+### Define Missings 
+
+is.na(data$age.t3) <- which(data$age.t3== 0)
+```
+
+```{r}
+### Calculating means T3
+#### Subjective well-being
+#Inverting items
+
+data$swb7.t3.i <- recode (data$swb7.t3, '1=5; 2=4; 4=2; 5=1')
+data$swb8.t3.i <- recode (data$swb8.t3, '1=5; 2=4; 4=2; 5=1')
+data$swb9.t3.i <- recode (data$swb9.t3, '1=5; 2=4; 4=2; 5=1')
+data$swb10.t3.i <- recode (data$swb10.t3, '1=5; 2=4; 4=2; 5=1')
+data$swb11.t3.i <- recode (data$swb11.t3, '1=5; 2=4; 4=2; 5=1')
+data$swb12.t3.i <- recode (data$swb12.t3, '1=5; 2=4; 4=2; 5=1')
+```
+
+```{r}
+#Calculating mean subjective well-being
+
+data$swb.t3 <- rowMeans (data [c("swb1.t3", "swb2.t3", "swb3.t3", "swb4.t3", 
+                                 "swb5.t3", "swb6.t3", "swb7.t3.i", "swb8.t3.i",
+                                 "swb9.t3.i", "swb10.t3.i", "swb11.t3.i", "swb12.t3.i")]) 
+```
+
+```{r}
+#### Time affluence
+#Inverting items
+
+data$t1.t3.i <- recode (data$t1.t3, '1=5; 2=4; 4=2; 5=1')
+data$t3.t3.i <- recode (data$t3.t3, '1=5; 2=4; 4=2; 5=1')
+data$t6.t3.i <- recode (data$t6.t3, '1=5; 2=4; 4=2; 5=1')
+data$t8.t3.i <- recode (data$t8.t3, '1=5; 2=4; 4=2; 5=1')
+```
+
+```{r}
+#Calculating mean time affluence
+
+data$t.t3 <- rowMeans (data [c("t1.t3.i", "t2.t3", "t3.t3.i", "t4.t3",
+                               "t5.t3", "t6.t3.i", "t7.t3", "t8.t3.i")])
+```
+
+```{r}
+#### Basic psychological needs
+#Inverting items
+
+data$gbk16.t3.i <- recode (data$gbk16.t3, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk17.t3.i <- recode (data$gbk17.t3, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk18.t3.i <- recode (data$gbk18.t3, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+
+data$gbk3.t3.i <- recode (data$gbk3.t3, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk4.t3.i <- recode (data$gbk4.t3, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk5.t3.i <- recode (data$gbk5.t3, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+
+data$gbk8.t3.i <- recode (data$gbk8.t3, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk10.t3.i <- recode (data$gbk10.t3, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk11.t3.i <- recode (data$gbk11.t3, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+```
+
+```{r}
+#Calculating means basic psychological needs
+
+data$gbk.t3.r <- rowMeans (data [c("gbk13.t3", "gbk14.t3", "gbk15.t3",
+                                   "gbk16.t3.i", "gbk17.t3.i", "gbk18.t3.i")])   #relatedness satisfaction
+
+data$gbk.t3.a <- rowMeans (data [c("gbk1.t3", "gbk2.t3", "gbk6.t3",
+                                   "gbk3.t3.i", "gbk4.t3.i", "gbk5.t3.i")])    #autonomy satisfaction
+
+data$gbk.t3.c <- rowMeans (data [c("gbk9.t3", "gbk12.t3",
+                                   "gbk8.t3.i", "gbk10.t3.i", "gbk11.t3.i")])  #competence satisfaction
+
+
+data$gbk.t3.s <- rowMeans (data [c("gbk13.t3", "gbk14.t3", "gbk15.t3",
+                                   "gbk16.t3.i", "gbk17.t3.i", "gbk18.t3.i",
+                                   "gbk1.t3", "gbk2.t3", "gbk6.t3",
+                                   "gbk3.t3.i", "gbk4.t3.i", "gbk5.t3.i",
+                                   "gbk9.t3", "gbk12.t3",
+                                   "gbk8.t3.i", "gbk10.t3.i", "gbk11.t3.i")])  #basic needs satisfaction
+```
+
+```{r}
+#### Sufficiency orientation
+#Inverting items
+
+data$so4.t3.i <- recode (data$so4.t3, '1=5; 2=4; 4=2; 5=1')
+```
+
+```{r}
+#z-standardizing items
+
+data$sv1.t3.z <- scale(data$sv1.t3)
+data$sv2.t3.z <- scale(data$sv2.t3)
+data$sv3.t3.z <- scale(data$sv3.t3)
+data$sv4.t3.z <- scale(data$sv4.t3)
+data$sv5.t3.z <- scale(data$sv5.t3)
+data$sv6.t3.z <- scale(data$sv6.t3)
+data$sv12.t3.z <- scale(data$sv12.t3)
+data$sv13.t3.z <- scale(data$sv13.t3)
+data$sv14.t3.z <- scale(data$sv14.t3)
+data$sv15.t3.z <- scale(data$sv15.t3)
+data$sv16.t3.z <- scale(data$sv16.t3)
+data$sv17.t3.z <- scale(data$sv17.t3)
+data$sv18.t3.z <- scale(data$sv18.t3)
+
+data$so1.t3.z <- scale(data$so1.t3)
+data$so2.t3.z <- scale(data$so2.t3)
+data$so3.t3.z <- scale(data$so3.t3)
+data$so4.t3.i.z <- scale(data$so4.t3.i)
+data$so5.t3.z <- scale(data$so5.t3)
+data$so6.t3.z <- scale(data$so6.t3)
+data$so7.t3.z <- scale(data$so7.t3)
+data$so8.t3.z <- scale(data$so8.t3)
+data$so9.t3.z <- scale(data$so9.t3)
+data$so10.t3.z <- scale(data$so10.t3)
+data$so11.t3.z <- scale(data$so11.t3)
+data$so12.t3.z <- scale(data$so12.t3)
+data$so13.t3.z <- scale(data$so13.t3)
+```
+
+```{r}
+#Calculating mean sufficiency orientation
+
+data$s.t3 <- rowMeans (data [c("so1.t3.z", "so2.t3.z", "so4.t3.i.z", "so5.t3.z",
+                               "so6.t3.z", "so8.t3.z", "so9.t3.z", "so10.t3.z",
+                               "so11.t3.z", "so12.t3.z", "so13.t3.z",
+                               "sv1.t3.z", "sv2.t3.z", "sv3.t3.z", "sv4.t3.z",
+                               "sv5.t3.z", "sv6.t3.z",
+                               "sv12.t3.z", "sv13.t3.z", "sv14.t3.z", "sv15.t3.z",
+                               "so7.t3.z",
+                               "sv16.t3.z", "sv17.t3.z", "sv18.t3.z", "so3.t3.z")])
+```
+
+
+```{r}
+#### Self-reflection
+
+data$sr.t3 <- rowMeans (data [c("sr1.t3", "sr2.t3", "sr3.t3", "sr4.t3",
+                                "sr5.t3", "sr7.t3")]) 
+```
+
+```{r}
+#### Standardized scales T3
+
+# Sufficiency orientation
+data$s.t3.z <- scale(data [,"s.t3"])
+
+# Subjective well-being
+data$swb.t3.z <- scale(data [,"swb.t3"])
+
+# Basic psychological needs
+data$gbk.t3.s.z <- scale(data [,"gbk.t3.s"])
+
+# Time affluence
+data$t.t3.z <- scale(data [,"t.t3"])
+
+# Self-reflection
+data$sr.t3.z <- scale(data [,"sr.t3"])
+```
+
+
+```{r}
+### Calculating outliers T3
+
+d.t3 <- filter(data, ok.t3 == 1 & dauer.t3 > 0 & (check.t3 == 4 | is.na(check.t3)))
+
+d.t3.a <- filter(d.t3, s.t3.z <= 2.5 & s.t3.z >= (-2.5)
+                & swb.t3.z <= 2.5 & swb.t3.z >= (-2.5) 
+                & gbk.t3.s.z <= 2.5 & gbk.t3.s.z >= (-2.5) 
+                & t.t3.z <= 2.5 & t.t3.z >= (-2.5)
+                & sr.t3.z <= 2.5 & sr.t3.z >= (-2.5)) 
+```
+
+```{r}
+### Renaming dataset T3
+
+table_fu <- d.t3.a
+```
+
+
+```{r}
+## Combining datasets
+#Combining T1 and T2
+
+table_pre_post <- full_join(table_pre, table_post, by = c ("case", "bed"))
+```
+
+```{r}
+#Attaching T3
+
+d <- full_join(table_pre_post, table_fu, by = c ("case", "bed"))
+data <- d
+```
+
+
+
+# Scatterplots
+```{r}
+pairs(~data$swb.t1+data$swb.t2+data$swb.t3+
+       data$t.t1+data$t.t2+data$t.t3+
+       data$sr.t1+data$sr.t2+data$sr.t3+
+       data$gbk.t1.s+data$gbk.t2.s+data$gbk.t3.s, 
+       data$s.t1 +
+       data$s.t2 + 
+       data$s.t3, data=data,
+      main="Scatterplot Matrix")
+```
+
+# EFA sufficiency items {.tabset}
+```{r}
+subset.1 <- data[c("sv1.t1", "sv2.t1", "sv3.t1", "sv4.t1", "sv5.t1",
+                   "sv6.t1", "sv12.t1", "sv13.t1", "sv14.t1", "sv15.t1",
+                   "sv16.t1", "sv17.t1", "sv18.t1",
+                   "so1.t1", "so2.t1", "so3.t1", "so4.t1", "so5.t1",
+                   "so6.t1", "so7.t1", "so8.t1", "so9.t1", "so10.t1",
+                   "so11.t1", "so12.t1", "so13.t1")] 
+
+```
+
+## Checking data suitability using the Kaiser-Maier-Olkin coeffizient
+```{r}
+KMO(subset.1)
+```
+
+## Simple scree plot
+```{r}
+VSS.scree (subset.1)
+```
+
+## Horn's parallel analysis
+```{r}
+parallel.1 <- fa.parallel (subset.1, fm="pa", fa = "fa")
+```
+
+Eigenvalues of factors
+```{r}
+parallel.1$fa.values
+```
+
+## Factor analysis with fixed number of factors
+with oblique rotation
+```{r}
+fa.pa.promax.1 <- fa(subset.1, 5, fm = "pa", rotate = "Promax")  
+print (fa.pa.promax.1, digits = 2, cut = .3, sort = TRUE)       
+```
+
+## Visualizing results
+```{r}
+fa.diagram(fa.pa.promax.1, simple=TRUE, cut=.4, digits=2)
+```
+
+# Descriptives {.tabset}
+## Age and political orientation
+```{r}
+subset.sd <- subset (data, select = c(age.t1, age.t2, age.t3, 
+                                      pol_orient.t1, pol_orient.t2, pol_orient.t3))
+
+describe (subset.sd)
+```
+
+## Gender
+```{r}
+table (data$gender.t1)
+prop.table (table (data$gender.t1))
+
+table (data$gender.t2)
+prop.table (table (data$gender.t2))
+
+table (data$gender.t3)
+prop.table (table (data$gender.t3))
+```
+
+## Education
+```{r}
+table (data$edu.t1)
+prop.table (table (data$edu.t1))
+
+table (data$edu.t2)
+prop.table (table (data$edu.t2))
+
+table (data$edu.t3)
+prop.table (table (data$edu.t3))
+```
+
+## Income
+```{r}
+table (data$income.t1)
+prop.table (table (data$income.t1))
+
+table (data$income.t2)
+prop.table (table (data$income.t2))
+
+table (data$income.t3)
+prop.table (table (data$income.t3))
+```
+
+## Subjective well-being
+```{r}
+subset.swb <- subset (data, select = c(swb.t1, swb.t2, swb.t3))
+
+describe (subset.swb)
+```
+
+## Time affluence
+```{r}
+subset.t <- subset (data, select = c(t.t1, t.t2, t.t3))
+
+describe (subset.t)
+```
+
+## Basic psychological needs
+```{r}
+subset.gb <- subset (data, select = c(gbk.t1.s, gbk.t1.a, gbk.t1.c, gbk.t1.r,
+                                      gbk.t2.s, gbk.t2.a, gbk.t2.c, gbk.t2.r,
+                                      gbk.t3.s, gbk.t3.a, gbk.t3.c, gbk.t3.r))
+
+describe (subset.gb)
+```
+
+## Sufficiency orientation
+```{r}
+subset.s <- subset (data, select = c(s.t1, s.t2, s.t3))
+describe (subset.s)
+```
+
+## Self-reflection
+```{r}
+subset.sr <- subset (data, select = c(sr.t1, sr.t2, sr.t3))
+
+describe (subset.sr)
+```
+
+# Descriptives by group/condition {.tabset}
+## N
+```{r}
+subset.sd <- subset (data, select = c(bed, ok.t1, ok.t2, ok.t3)) 
+                           
+describe (subset.sd)
+describeBy(subset.sd, data$bed, mat = TRUE)
+```
+
+## Age and political orientation
+```{r}
+subset.sd <- subset (data, select = c(age.t1, age.t2, age.t3, 
+                                      pol_orient.t1, pol_orient.t2, pol_orient.t3))
+
+describeBy(subset.sd, data$bed, mat = TRUE)
+```
+
+## Gender
+```{r}
+table (data$gender.t1, data$bed)
+prop.table(table (data$gender.t1, data$bed))
+
+table (data$gender.t2, data$bed)
+prop.table (table (data$gender.t2, data$bed))
+
+table (data$gender.t3, data$bed)
+prop.table (table (data$gender.t3, data$bed))
+```
+
+## Education
+```{r}
+table (data$edu.t1, data$bed)
+prop.table (table (data$edu.t1, data$bed))
+
+table (data$edu.t2, data$bed)
+prop.table (table (data$edu.t2, data$bed))
+
+table (data$edu.t3, data$bed)
+prop.table (table (data$edu.t3, data$bed))
+```
+
+## Income
+```{r}
+table (data$income.t1, data$bed)
+prop.table (table (data$income.t1, data$bed))
+
+table (data$income.t2, data$bed)
+prop.table (table (data$income.t2, data$bed))
+
+table (data$income.t3, data$bed)
+prop.table (table (data$income.t3, data$bed))
+```
+
+## Subjective well-being
+```{r}
+subset.swb <- subset (data, select = c(swb.t1, swb.t2, swb.t3))
+
+describeBy(subset.swb, data$bed, mat = TRUE)
+```
+
+## Time affluence
+```{r}
+subset.t <- subset (data, select = c(t.t1, t.t2, t.t3))
+
+describeBy(subset.t, data$bed, mat = TRUE)
+```
+
+## Basic psychological needs
+```{r}
+subset.gb <- subset (data, select = c(gbk.t1.s, gbk.t1.a, gbk.t1.c, gbk.t1.r,
+                                      gbk.t2.s, gbk.t2.a, gbk.t2.c, gbk.t2.r,
+                                      gbk.t3.s, gbk.t3.a, gbk.t3.c, gbk.t3.r))
+
+describeBy(subset.gb, data$bed, mat = TRUE)
+```
+
+## Sufficiency orientation
+```{r}
+subset.s <- subset (data, select = c(s.t1, s.t2, s.t3))
+
+describeBy(subset.s, data$bed, mat = TRUE)
+```
+
+## Self-reflection
+```{r}
+subset.sr <- subset (data, select = c(sr.t1, sr.t2, sr.t3))
+
+describeBy(subset.sr, data$bed, mat = TRUE)
+```
+
+# Reliability {.tabset}
+## Subjective well-being {.tabset}
+### T1
+```{r}
+alpha (data[c("swb1.t1", "swb2.t1", "swb3.t1", "swb4.t1", 
+              "swb5.t1", "swb6.t1", "swb7.t1.i", "swb8.t1.i",
+              "swb9.t1.i", "swb10.t1.i", "swb11.t1.i", "swb12.t1.i")])
+```
+
+### T2
+```{r}
+alpha (data[c("swb1.t2", "swb2.t2", "swb3.t2", "swb4.t2", 
+              "swb5.t2", "swb6.t2", "swb7.t2.i", "swb8.t2.i",
+              "swb9.t2.i", "swb10.t2.i", "swb11.t2.i", "swb12.t2.i")])   
+```
+
+### T3
+```{r}
+alpha (data[c("swb1.t3", "swb2.t3", "swb3.t3", "swb4.t3", 
+              "swb5.t3", "swb6.t3", "swb7.t3.i", "swb8.t3.i",
+              "swb9.t3.i", "swb10.t3.i", "swb11.t3.i", "swb12.t3.i")])  
+```
+
+## Time affluence {.tabset}
+### T1
+```{r}
+alpha (data[c("t1.t1.i", "t2.t1", "t3.t1.i", "t4.t1",
+              "t5.t1", "t6.t1.i", "t7.t1", "t8.t1.i")])
+```
+
+### T2
+```{r}
+alpha (data[c("t1.t2.i", "t2.t2", "t3.t2.i", "t4.t2",
+              "t5.t2", "t6.t2.i", "t7.t2", "t8.t2.i")]) 
+```
+
+### T3
+```{r}
+alpha (data[c("t1.t3.i", "t2.t3", "t3.t3.i", "t4.t3",
+              "t5.t3", "t6.t3.i", "t7.t3", "t8.t3.i")]) 
+```
+
+## Basic psychological needs {.tabset}
+### T1
+```{r}
+alpha (data[c("gbk13.t1", "gbk14.t1", "gbk15.t1",
+              "gbk16.t1.i", "gbk17.t1.i", "gbk18.t1.i",
+              "gbk1.t1", "gbk2.t1", "gbk6.t1",
+              "gbk3.t1.i", "gbk4.t1.i", "gbk5.t1.i",
+              "gbk9.t1", "gbk12.t1",
+              "gbk10.t1.i", "gbk11.t1.i",
+              "gbk8.t1.i")])
+```
+
+### T2
+```{r}
+alpha (data[c("gbk13.t2", "gbk14.t2", "gbk15.t2",
+              "gbk16.t2.i", "gbk17.t2.i", "gbk18.t2.i",
+              "gbk1.t2", "gbk2.t2", "gbk6.t2",
+              "gbk3.t2.i", "gbk4.t2.i", "gbk5.t2.i",
+              "gbk9.t2", "gbk12.t2",
+              "gbk10.t2.i", "gbk11.t2.i",
+              "gbk8.t2.i")])
+```
+
+### T3
+```{r}
+alpha (data[c("gbk13.t3", "gbk14.t3", "gbk15.t3",
+              "gbk16.t3.i", "gbk17.t3.i", "gbk18.t3.i",
+              "gbk1.t3", "gbk2.t3", "gbk6.t3",
+              "gbk3.t3.i", "gbk4.t3.i", "gbk5.t3.i",
+              "gbk9.t3", "gbk12.t3",
+              "gbk10.t3.i", "gbk11.t3.i",
+              "gbk8.t3.i")])
+```
+
+## Self-reflection {.tabset}
+### T1
+```{r}
+alpha (data[c("sr1.t1", "sr2.t1", "sr3.t1", "sr4.t1",
+              "sr5.t1", "sr7.t1")])                       
+```
+
+### T2
+```{r}
+alpha (data[c("sr1.t2", "sr2.t2", "sr3.t2", "sr4.t2",
+              "sr5.t2", "sr7.t2")])                      
+```
+
+### T3
+```{r}
+alpha (data[c("sr1.t3", "sr2.t3", "sr3.t3", "sr4.t3",
+              "sr5.t3", "sr7.t3")])                      
+```
+
+### Self-reflection all items {.tabset}
+#### T1
+```{r}
+alpha (data[c("sr1.t1", "sr2.t1", "sr3.t1", "sr4.t1",
+              "sr5.t1", "sr6.t1", "sr7.t1")])                   
+```
+
+#### T2
+```{r}
+alpha (data[c("sr1.t2", "sr2.t2", "sr3.t2", "sr4.t2",
+              "sr5.t2", "sr6.t2", "sr7.t2")])                
+```
+
+#### T3
+```{r}
+ alpha (data[c("sr1.t3", "sr2.t3", "sr3.t3", "sr4.t3",
+              "sr5.t3", "sr6.t3", "sr7.t3")])                
+```
+
+## Sufficiency orientation {.tabset}
+### T1
+```{r}
+alpha (data [c("so1.t1.z", "so2.t1.z", "so4.t1.i.z", "so5.t1.z",
+                               "so6.t1.z", "so8.t1.z", "so9.t1.z", "so10.t1.z",
+                               "so11.t1.z", "so12.t1.z", "so13.t1.z",
+                               "sv1.t1.z", "sv2.t1.z", "sv3.t1.z", "sv4.t1.z",
+                               "sv5.t1.z", "sv6.t1.z",
+                               "sv12.t1.z", "sv13.t1.z", "sv14.t1.z", "sv15.t1.z",
+                               "so7.t1.z",
+                               "sv16.t1.z", "sv17.t1.z", "sv18.t1.z", "so3.t1.z")])
+```
+
+### T2
+```{r}
+alpha (data [c("so1.t2.z", "so2.t2.z", "so4.t2.i.z", "so5.t2.z",
+                               "so6.t2.z", "so8.t2.z", "so9.t2.z", "so10.t2.z",
+                               "so11.t2.z", "so12.t2.z", "so13.t2.z",
+                               "sv1.t2.z", "sv2.t2.z", "sv3.t2.z", "sv4.t2.z",
+                               "sv5.t2.z", "sv6.t2.z",
+                               "sv12.t2.z", "sv13.t2.z", "sv14.t2.z", "sv15.t2.z",
+                               "so7.t2.z",
+                               "sv16.t2.z", "sv17.t2.z", "sv18.t2.z", "so3.t2.z")])
+```
+
+### T3
+```{r}
+alpha (data [c("so1.t3.z", "so2.t3.z", "so4.t3.i.z", "so5.t3.z",
+                               "so6.t3.z", "so8.t3.z", "so9.t3.z", "so10.t3.z",
+                               "so11.t3.z", "so12.t3.z", "so13.t3.z",
+                               "sv1.t3.z", "sv2.t3.z", "sv3.t3.z", "sv4.t3.z",
+                               "sv5.t3.z", "sv6.t3.z",
+                               "sv12.t3.z", "sv13.t3.z", "sv14.t3.z", "sv15.t3.z",
+                               "so7.t3.z",
+                               "sv16.t3.z", "sv17.t3.z", "sv18.t3.z", "so3.t3.z")])
+```
+
+
+# Reliability by group/condition {.tabset}
+## Subjective well-being {.tabset}
+### Control group {.tabset}
+#### T1
+```{r}
+alpha (subset(data, bed == 0)[c("swb1.t1", "swb2.t1", "swb3.t1", "swb4.t1", 
+              "swb5.t1", "swb6.t1", "swb7.t1.i", "swb8.t1.i",
+              "swb9.t1.i", "swb10.t1.i", "swb11.t1.i", "swb12.t1.i")])  
+```
+
+#### T2
+```{r}
+alpha (subset(data, bed == 0)[c("swb1.t2", "swb2.t2", "swb3.t2", "swb4.t2", 
+              "swb5.t2", "swb6.t2", "swb7.t2.i", "swb8.t2.i",
+              "swb9.t2.i", "swb10.t2.i", "swb11.t2.i", "swb12.t2.i")])  
+```
+
+#### T3
+```{r}
+alpha (subset(data, bed == 0)[c("swb1.t3", "swb2.t3", "swb3.t3", "swb4.t3", 
+              "swb5.t3", "swb6.t3", "swb7.t3.i", "swb8.t3.i",
+              "swb9.t3.i", "swb10.t3.i", "swb11.t3.i", "swb12.t3.i")])  
+```
+
+### Intervention group {.tabset}
+#### T1
+```{r}
+alpha (subset(data, bed == 1)[c("swb1.t1", "swb2.t1", "swb3.t1", "swb4.t1", 
+              "swb5.t1", "swb6.t1", "swb7.t1.i", "swb8.t1.i",
+              "swb9.t1.i", "swb10.t1.i", "swb11.t1.i", "swb12.t1.i")])
+```
+
+#### T2
+```{r}
+alpha (subset(data, bed == 1)[c("swb1.t2", "swb2.t2", "swb3.t2", "swb4.t2", 
+              "swb5.t2", "swb6.t2", "swb7.t2.i", "swb8.t2.i",
+              "swb9.t2.i", "swb10.t2.i", "swb11.t2.i", "swb12.t2.i")])  
+```
+
+#### T3
+```{r}
+alpha (subset(data, bed == 1)[c("swb1.t3", "swb2.t3", "swb3.t3", "swb4.t3", 
+              "swb5.t3", "swb6.t3", "swb7.t3.i", "swb8.t3.i",
+              "swb9.t3.i", "swb10.t3.i", "swb11.t3.i", "swb12.t3.i")])   
+```
+
+## Time affluence  {.tabset}
+### Control group  {.tabset}
+#### T1
+```{r}
+alpha (subset(data, bed == 0)[c("t1.t1.i", "t2.t1", "t3.t1.i", "t4.t1",
+              "t5.t1", "t6.t1.i", "t7.t1", "t8.t1.i")]) 
+```
+
+#### T2
+```{r}
+alpha (subset(data, bed == 0)[c("t1.t2.i", "t2.t2", "t3.t2.i", "t4.t2",
+              "t5.t2", "t6.t2.i", "t7.t2", "t8.t2.i")])  
+```
+
+#### T3
+```{r}
+alpha (subset(data, bed == 0)[c("t1.t3.i", "t2.t3", "t3.t3.i", "t4.t3",
+              "t5.t3", "t6.t3.i", "t7.t3", "t8.t3.i")])   
+```
+
+
+### Intervention group {.tabset}
+#### T1
+```{r}
+alpha (subset(data, bed == 1)[c("t1.t1.i", "t2.t1", "t3.t1.i", "t4.t1",
+              "t5.t1", "t6.t1.i", "t7.t1", "t8.t1.i")])
+```
+
+#### T2
+```{r}
+alpha (subset(data, bed == 1)[c("t1.t2.i", "t2.t2", "t3.t2.i", "t4.t2",
+              "t5.t2", "t6.t2.i", "t7.t2", "t8.t2.i")]) 
+```
+
+#### T3
+```{r}
+alpha (subset(data, bed == 1)[c("t1.t3.i", "t2.t3", "t3.t3.i", "t4.t3",
+              "t5.t3", "t6.t3.i", "t7.t3", "t8.t3.i")]) 
+```
+
+## Basic psychological needs {.tabset}
+### Control group {.tabset}
+#### T1
+```{r}
+alpha (subset(data, bed == 0)[c("gbk13.t1", "gbk14.t1", "gbk15.t1",
+              "gbk16.t1.i", "gbk17.t1.i", "gbk18.t1.i",
+              "gbk1.t1", "gbk2.t1", "gbk6.t1",
+              "gbk3.t1.i", "gbk4.t1.i", "gbk5.t1.i",
+              "gbk9.t1", "gbk12.t1",
+              "gbk10.t1.i", "gbk11.t1.i",
+              "gbk8.t1.i")])
+```
+
+#### T2
+```{r}
+alpha (subset(data, bed == 0)[c("gbk13.t2", "gbk14.t2", "gbk15.t2",
+              "gbk16.t2.i", "gbk17.t2.i", "gbk18.t2.i",
+              "gbk1.t2", "gbk2.t2", "gbk6.t2",
+              "gbk3.t2.i", "gbk4.t2.i", "gbk5.t2.i",
+              "gbk9.t2", "gbk12.t2",
+              "gbk10.t2.i", "gbk11.t2.i",
+              "gbk8.t2.i")])   
+```
+
+#### T3
+```{r}
+alpha (subset(data, bed == 0)[c("gbk13.t3", "gbk14.t3", "gbk15.t3",
+              "gbk16.t3.i", "gbk17.t3.i", "gbk18.t3.i",
+              "gbk1.t3", "gbk2.t3", "gbk6.t3",
+              "gbk3.t3.i", "gbk4.t3.i", "gbk5.t3.i",
+              "gbk9.t3", "gbk12.t3",
+              "gbk10.t3.i", "gbk11.t3.i",
+              "gbk8.t3.i")])   
+```
+
+
+### Intervention group {.tabset}
+#### T1
+```{r}
+alpha (subset(data, bed == 1)[c("gbk13.t1", "gbk14.t1", "gbk15.t1",
+              "gbk16.t1.i", "gbk17.t1.i", "gbk18.t1.i",
+              "gbk1.t1", "gbk2.t1", "gbk6.t1",
+              "gbk3.t1.i", "gbk4.t1.i", "gbk5.t1.i",
+              "gbk9.t1", "gbk12.t1",
+              "gbk10.t1.i", "gbk11.t1.i",
+              "gbk8.t1.i")])  
+```
+
+#### T2
+```{r}
+alpha (subset(data, bed == 1)[c("gbk13.t2", "gbk14.t2", "gbk15.t2",
+              "gbk16.t2.i", "gbk17.t2.i", "gbk18.t2.i",
+              "gbk1.t2", "gbk2.t2", "gbk6.t2",
+              "gbk3.t2.i", "gbk4.t2.i", "gbk5.t2.i",
+              "gbk9.t2", "gbk12.t2",
+              "gbk10.t2.i", "gbk11.t2.i",
+              "gbk8.t2.i")])   
+```
+
+#### T3
+```{r}
+alpha (subset(data, bed == 1)[c("gbk13.t3", "gbk14.t3", "gbk15.t3",
+              "gbk16.t3.i", "gbk17.t3.i", "gbk18.t3.i",
+              "gbk1.t3", "gbk2.t3", "gbk6.t3",
+              "gbk3.t3.i", "gbk4.t3.i", "gbk5.t3.i",
+              "gbk9.t3", "gbk12.t3",
+              "gbk10.t3.i", "gbk11.t3.i",
+              "gbk8.t3.i")])                                               
+```
+
+## Self-reflection {.tabset}
+### Control group {.tabset}
+#### T1
+```{r}
+alpha (subset(data, bed == 0)[c("sr1.t1", "sr2.t1", "sr3.t1", "sr4.t1",
+              "sr5.t1", "sr7.t1")])
+```
+
+#### T2
+```{r}
+alpha (subset(data, bed == 0)[c("sr1.t2", "sr2.t2", "sr3.t2", "sr4.t2",
+              "sr5.t2", "sr7.t2")])    
+```
+
+#### T3
+```{r}
+alpha (subset(data, bed == 0)[c("sr1.t3", "sr2.t3", "sr3.t3", "sr4.t3",
+              "sr5.t3", "sr7.t3")])   
+```
+
+### Intervention group {.tabset}
+#### T1
+```{r}
+alpha (subset(data, bed == 1)[c("sr1.t1", "sr2.t1", "sr3.t1", "sr4.t1",
+              "sr5.t1", "sr7.t1")]) 
+```
+
+#### T2
+```{r}
+alpha (subset(data, bed == 1)[c("sr1.t2", "sr2.t2", "sr3.t2", "sr4.t2",
+              "sr5.t2", "sr7.t2")])  
+```
+
+#### T3
+```{r}
+alpha (subset(data, bed == 1)[c("sr1.t3", "sr2.t3", "sr3.t3", "sr4.t3",
+              "sr5.t3", "sr7.t3")]) 
+```
+
+
+## Self-reflection all items {.tabset}
+### Control group {.tabset}
+#### T1
+```{r}
+alpha (subset(data, bed == 0)[c("sr1.t1", "sr2.t1", "sr3.t1", "sr4.t1",
+              "sr5.t1", "sr6.t1", "sr7.t1")])    
+```
+
+#### T2
+```{r}
+alpha (subset(data, bed == 0)[c("sr1.t2", "sr2.t2", "sr3.t2", "sr4.t2",
+              "sr5.t2", "sr6.t2", "sr7.t2")])    
+```
+
+#### T3
+```{r}
+alpha (subset(data, bed == 0)[c("sr1.t3", "sr2.t3", "sr3.t3", "sr4.t3",
+              "sr5.t3", "sr6.t3", "sr7.t3")])       
+```
+
+### Intervention group {.tabset}
+#### T1
+```{r}
+alpha (subset(data, bed == 1)[c("sr1.t1", "sr2.t1", "sr3.t1", "sr4.t1",
+              "sr5.t1", "sr6.t1", "sr7.t1")]) 
+```
+
+#### T2
+```{r}
+alpha (subset(data, bed == 1)[c("sr1.t2", "sr2.t2", "sr3.t2", "sr4.t2",
+              "sr5.t2", "sr6.t2", "sr7.t2")])    
+```
+
+#### T3
+```{r}
+alpha (subset(data, bed == 1)[c("sr1.t3", "sr2.t3", "sr3.t3", "sr4.t3",
+              "sr5.t3", "sr6.t3", "sr7.t3")])     
+```
+
+## Sufficiency orientation {.tabset}
+### Control group {.tabset}
+#### T1
+```{r}
+alpha (subset(data, bed == 0) [c("so1.t1.z", "so2.t1.z", "so4.t1.i.z", "so5.t1.z",
+                               "so6.t1.z", "so8.t1.z", "so9.t1.z", "so10.t1.z",
+                               "so11.t1.z", "so12.t1.z", "so13.t1.z",
+                               "sv1.t1.z", "sv2.t1.z", "sv3.t1.z", "sv4.t1.z",
+                               "sv5.t1.z", "sv6.t1.z",
+                               "sv12.t1.z", "sv13.t1.z", "sv14.t1.z", "sv15.t1.z",
+                               "so7.t1.z",
+                               "sv16.t1.z", "sv17.t1.z", "sv18.t1.z", "so3.t1.z")]) 
+```
+
+#### T2
+```{r}
+alpha (subset(data, bed == 0) [c("so1.t2.z", "so2.t2.z", "so4.t2.i.z", "so5.t2.z",
+                               "so6.t2.z", "so8.t2.z", "so9.t2.z", "so10.t2.z",
+                               "so11.t2.z", "so12.t2.z", "so13.t2.z",
+                               "sv1.t2.z", "sv2.t2.z", "sv3.t2.z", "sv4.t2.z",
+                               "sv5.t2.z", "sv6.t2.z",
+                               "sv12.t2.z", "sv13.t2.z", "sv14.t2.z", "sv15.t2.z",
+                               "so7.t2.z",
+                               "sv16.t2.z", "sv17.t2.z", "sv18.t2.z", "so3.t2.z")]) 
+```
+
+#### T3
+```{r}
+alpha (subset(data, bed == 0) [c("so1.t3.z", "so2.t3.z", "so4.t3.i.z", "so5.t3.z",
+                               "so6.t3.z", "so8.t3.z", "so9.t3.z", "so10.t3.z",
+                               "so11.t3.z", "so12.t3.z", "so13.t3.z",
+                               "sv1.t3.z", "sv2.t3.z", "sv3.t3.z", "sv4.t3.z",
+                               "sv5.t3.z", "sv6.t3.z",
+                               "sv12.t3.z", "sv13.t3.z", "sv14.t3.z", "sv15.t3.z",
+                               "so7.t3.z",
+                               "sv16.t3.z", "sv17.t3.z", "sv18.t3.z", "so3.t3.z")])
+```
+
+### Intervention group {.tabset}
+#### T1
+```{r}
+alpha (subset(data, bed == 1) [c("so1.t1.z", "so2.t1.z", "so4.t1.i.z", "so5.t1.z",
+                               "so6.t1.z", "so8.t1.z", "so9.t1.z", "so10.t1.z",
+                               "so11.t1.z", "so12.t1.z", "so13.t1.z",
+                               "sv1.t1.z", "sv2.t1.z", "sv3.t1.z", "sv4.t1.z",
+                               "sv5.t1.z", "sv6.t1.z",
+                               "sv12.t1.z", "sv13.t1.z", "sv14.t1.z", "sv15.t1.z",
+                               "so7.t1.z",
+                               "sv16.t1.z", "sv17.t1.z", "sv18.t1.z", "so3.t1.z")]) 
+```
+
+#### T2
+```{r}
+alpha (subset(data, bed == 1) [c("so1.t2.z", "so2.t2.z", "so4.t2.i.z", "so5.t2.z",
+                               "so6.t2.z", "so8.t2.z", "so9.t2.z", "so10.t2.z",
+                               "so11.t2.z", "so12.t2.z", "so13.t2.z",
+                               "sv1.t2.z", "sv2.t2.z", "sv3.t2.z", "sv4.t2.z",
+                               "sv5.t2.z", "sv6.t2.z",
+                               "sv12.t2.z", "sv13.t2.z", "sv14.t2.z", "sv15.t2.z",
+                               "so7.t2.z",
+                               "sv16.t2.z", "sv17.t2.z", "sv18.t2.z", "so3.t2.z")]) 
+```
+
+#### T3
+```{r}
+alpha (subset(data, bed == 1) [c("so1.t3.z", "so2.t3.z", "so4.t3.i.z", "so5.t3.z",
+                               "so6.t3.z", "so8.t3.z", "so9.t3.z", "so10.t3.z",
+                               "so11.t3.z", "so12.t3.z", "so13.t3.z",
+                               "sv1.t3.z", "sv2.t3.z", "sv3.t3.z", "sv4.t3.z",
+                               "sv5.t3.z", "sv6.t3.z",
+                               "sv12.t3.z", "sv13.t3.z", "sv14.t3.z", "sv15.t3.z",
+                               "so7.t3.z",
+                               "sv16.t3.z", "sv17.t3.z", "sv18.t3.z", "so3.t3.z")]) 
+```
+
+# Correlations
+```{r}
+corr.test (data[,c("age.t1", "age.t2", "age.t3", 
+                    "pol_orient.t1", "pol_orient.t2", "pol_orient.t3",
+                    "swb.t1", "swb.t2", "swb.t3",
+                    "t.t1", "t.t2", "t.t3",
+                    "gbk.t1.s", 
+                    "gbk.t2.s",
+                    "gbk.t3.s",
+                    "s.t1",
+                    "s.t2",
+                    "s.t3",
+                    "sr.t1", "sr.t2", "sr.t3")], 
+           method = "spearman")
+```
+
+```{r}
+data.ci <-  cor.ci(data [,c("age.t1", "age.t2", "age.t3", 
+                            "pol_orient.t1", "pol_orient.t2", "pol_orient.t3",
+                            "swb.t1", "swb.t2", "swb.t3",
+                            "t.t1", "t.t2", "t.t3",
+                            "gbk.t1.s", 
+                            "gbk.t2.s",
+                            "gbk.t3.s",
+                            "s.t1",
+                            "s.t2",
+                            "s.t3",
+                            "sr.t1", "sr.t2", "sr.t3")])
+```
+
+```{r}
+ci <- cor.plot.upperLowerCi(data.ci)
+```
+
+Confidence intervals in matrix form
+```{r}
+ci  
+```
+
+# H1: Repeated measures ANOVA {.tabset}
+
+## Within Factors: time, person; between factor: condition {.tabset}
+### Preparations
+```{r}
+#### Packages ####
+library(psych)
+library(car)
+library(gplots)
+library(multcomp)
+library(effects)
+library(ez)
+library(sciplot)
+library(reshape)
+library(ggplot2)
+library(ggpubr)
+library(magrittr)
+library(rstatix)
+library(ggpubr)
+
+Analysis1 <- data
+myvars.s <- c("s.t1", "s.t2", "s.t3", "case", "bed")
+
+data.anova <- Analysis1[myvars.s]
+
+data.anova.s <- na.omit(data.anova) 
+
+data.anova.s <- data.anova.s %>%
+  gather(key = "Time", value = "Sufficiency", s.t1, s.t2, s.t3) %>%
+  convert_as_factor(case, Time)
+
+names(data.anova.s) <- c("Case", "Condition", "Time", "Sufficiency")
+
+data.anova.s$Condition <- factor(data.anova.s$Condition, labels = c("Control", "Experimental"))
+data.anova.s$Time <- factor(data.anova.s$Time, labels = c("T1", "T2", "T3"))
+```
+
+Summary statistics
+```{r}
+data.anova.s %>%
+  group_by(Condition, Time) %>%
+  get_summary_stats(Sufficiency, type = "mean_sd")
+
+bxp <- ggboxplot(
+  data.anova.s, x = "Time", y = "Sufficiency",
+  color = "Condition", palette = "jco"
+)
+bxp
+```
+
+Outliers
+```{r}
+data.anova.s %>%
+  group_by(Condition, Time) %>%
+  identify_outliers(Sufficiency) 
+```
+
+Assumptions
+```{r}
+data.anova.s %>%
+  group_by(Condition, Time) %>%
+  shapiro_test(Sufficiency) 
+
+ggqqplot(data.anova.s, "Sufficiency", ggtheme = theme_bw()) +
+  facet_grid(Time ~ Condition, labeller = "label_both")
+
+data.anova.s %>%
+  group_by(Time) %>%
+  levene_test(Sufficiency ~ Condition) 
+
+box_m(data.anova.s[, "Sufficiency", drop = FALSE], data.anova.s$Condition) 
+```
+
+### Two-way mixed ANOVA
+```{r}
+res.aov.s <- anova_test(
+  data = data.anova.s, dv = Sufficiency, wid = Case,
+  between = Condition, within = Time
+)
+get_anova_table(res.aov.s)
+```
+
+### Pairwise comparisons
+Timepoints as independent Variable
+```{r}
+data.anova.s%>%
+  pairwise_t_test(
+    Sufficiency ~ Time, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+  )
+```
+
+Condition as independent Variable
+```{r}
+data.anova.s %>%
+  pairwise_t_test(
+    Sufficiency ~ Condition, 
+    p.adjust.method = "bonferroni"
+  )
+```
+
+Effect of group at each time point (within subject effects)
+```{r}
+one.way.s <- data.anova.s %>%
+  group_by(Time) %>%
+  anova_test(dv = Sufficiency, wid = Case, between = Condition) %>%
+  get_anova_table() %>%
+  adjust_pvalue(method = "bonferroni")
+one.way.s
+```
+
+Pairwise comparisons between group levels
+```{r}
+pwc <- data.anova.s %>%
+  group_by(Time) %>%
+  pairwise_t_test(Sufficiency ~ Condition, p.adjust.method = "bonferroni")
+pwc
+```
+
+Effect of time at each level of exercises group
+```{r}
+one.way.s.2 <- data.anova.s %>%
+  group_by(Condition) %>%
+  anova_test(dv = Sufficiency, wid = Case, within = Time) %>%
+  get_anova_table() %>%
+  adjust_pvalue(method = "bonferroni")
+one.way.s.2
+```
+
+Pairwise comparisons between time points at each group levels
+```{r}
+pwc2 <- data.anova.s %>%
+  group_by(Condition) %>%
+  pairwise_t_test(
+    Sufficiency ~ Time, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+  )  
+pwc2
+```
+
+### Visualizations
+Boxplots with p-values
+```{r}
+pwc <- pwc %>% add_xy_position(x = "Time")
+pwc.filtered <- pwc %>% filter(Time != "T1")
+bxp + 
+  stat_pvalue_manual(pwc.filtered, tip.length = 0, hide.ns = TRUE) +
+  labs(
+    subtitle = get_test_label(res.aov.s, detailed = TRUE),
+    caption = get_pwc_label(pwc)
+  )
+```
+
+Graph displaying both groups 
+```{r}
+Anovaplot.s <- ggline(data.anova.s, "Time", "Sufficiency", add = "mean_se",
+       linetype = "Condition", shape = "Condition", color = "Condition", palette = c("#00AFBB", "#E7B800"), font.label = list(size = 8, color = "black"))
+
+Anovaplot.s
+
+ggsave(Anovaplot.s, file="Anovaplot.png", width = 10,
+  height = 7, units = "cm", dpi = 300)
+```
+
+## Manipulation check: Self-reflection x time ANOVA {.tabset}
+### Preparations
+```{r}
+attach(Analysis1)
+myvars.sr <- c("sr.t1", "sr.t2", "sr.t3", "case", "bed")
+data.anova.sr <- Analysis1[myvars.sr]
+
+data.anova.sr <- na.omit(data.anova.sr) 
+
+data.anova.sr <- data.anova.sr %>%
+  gather(key = "Time", value = "Reflection", sr.t1, sr.t2, sr.t3) %>%
+  convert_as_factor(case, Time)
+
+names(data.anova.sr) <- c("Case", "Condition", "Time", "Reflection")
+
+data.anova.sr$Condition <- factor(data.anova.sr$Condition, labels = c("Control", "Experimental"))
+data.anova.sr$Time <- factor(data.anova.sr$Time, labels = c("T1", "T2", "T3"))
+```
+
+Summary statistics
+```{r}
+data.anova.sr %>%
+  group_by(Condition, Time) %>%
+  get_summary_stats(Reflection, type = "mean_sd")
+
+bxp <- ggboxplot(
+  data.anova.sr, x = "Time", y = "Reflection",
+  color = "Condition", palette = "jco"
+)
+bxp
+```
+
+Outliers
+```{r}
+data.anova.sr %>%
+  group_by(Condition, Time) %>%
+  identify_outliers(Reflection) 
+```
+
+Assumptions
+```{r}
+data.anova.sr %>%
+  group_by(Condition, Time) %>%
+  shapiro_test(`Reflection`) 
+
+ggqqplot(data.anova.sr, "Reflection", ggtheme = theme_bw()) +
+  facet_grid(Time ~ Condition, labeller = "label_both")
+
+data.anova.sr %>%
+  group_by(Time) %>%
+  levene_test(Reflection ~ Condition) 
+
+box_m(data.anova.sr[, "Reflection", drop = FALSE], data.anova.sr$Condition) 
+```
+
+### Repeated measures ANOVA 
+```{r}
+res.aov.sr <- anova_test(
+  data = data.anova.sr, dv = Reflection, wid = Case,
+  between = Condition, within = Time
+)
+get_anova_table(res.aov.sr)
+```
+
+### Pairwise comparisons
+Timepoints as independent variable
+```{r}
+data.anova.sr%>%
+  pairwise_t_test(
+    Reflection ~ Time, paired = TRUE, 
+    p.adjust.method = "bonferroni")
+```
+
+Condition as independent Variable
+```{r}
+data.anova.sr %>%
+  pairwise_t_test(
+    Reflection ~ Condition, 
+    p.adjust.method = "bonferroni")
+```
+
+Effect of group at each time point (within subject effects)
+```{r}
+one.way.sr <- data.anova.sr %>%
+  group_by(Time) %>%
+  anova_test(dv = Reflection, wid = Case, between = Condition) %>%
+  get_anova_table() %>%
+  adjust_pvalue(method = "bonferroni")
+one.way.sr
+```
+
+Pairwise comparisons between group levels
+```{r}
+pwc <- data.anova.sr %>%
+  group_by(Time) %>%
+  pairwise_t_test(Reflection ~ Condition, p.adjust.method = "bonferroni")
+pwc
+```
+
+Effect of time at each level of exercises group
+```{r}
+one.way.sr.2 <- data.anova.sr %>%
+  group_by(Condition) %>%
+  anova_test(dv = Reflection, wid = Case, within = Time) %>%
+  get_anova_table() %>%
+  adjust_pvalue(method = "bonferroni")
+one.way.sr.2
+```
+
+Pairwise comparisons between time points at each group levels
+```{r}
+pwc2 <- data.anova.sr %>%
+  group_by(Condition) %>%
+  pairwise_t_test(
+    Reflection ~ Time, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+  )  
+pwc2
+```
+
+### Visualizations
+Boxplots with p-values
+```{r}
+pwc <- pwc %>% add_xy_position(x = "Time")
+pwc.filtered <- pwc %>% filter(Time != "T1")
+bxp + 
+  stat_pvalue_manual(pwc.filtered, tip.length = 0, hide.ns = TRUE) +
+  labs(
+    subtitle = get_test_label(res.aov.sr, detailed = TRUE),
+    caption = get_pwc_label(pwc)
+  )
+```
+
+Graph displaying both groups
+```{r}
+ggline(data.anova.sr, "Time", "Reflection", add = "mean_se",
+       linetype = "Condition", shape = "Condition", color = "Condition", palette = c("#00AFBB", "#E7B800"), font.label = list(size = 8, color = "black"))
+```
+
+# H2: Basic psychological need satisfaction is positively associated with sufficiency
+```{r}
+corr.test (data[,c("gbk.t1.s", "gbk.t1.a", "gbk.t1.c", "gbk.t1.r",
+                   "gbk.t2.s", "gbk.t2.a", "gbk.t2.c", "gbk.t2.r",
+                   "gbk.t3.s", "gbk.t3.a", "gbk.t3.c", "gbk.t3.r",
+                   "s.t1", "s.t2", "s.t3")], 
+           method = "spearman")
+```
+
+```{r}
+data.ci <-  cor.ci(data [,c("gbk.t1.s", "gbk.t1.a", "gbk.t1.c", "gbk.t1.r",
+                   "gbk.t2.s", "gbk.t2.a", "gbk.t2.c", "gbk.t2.r",
+                   "gbk.t3.s", "gbk.t3.a", "gbk.t3.c", "gbk.t3.r",
+                   "s.t1", "s.t2", "s.t3")])
+```
+
+```{r}
+ci <- cor.plot.upperLowerCi(data.ci)
+```
+
+Confidence intervals in matrix form
+```{r}
+ci  
+```
+
+# H4: Self-reflection is positively associated with sufficiency
+```{r}
+corr.test (data[,c("s.t1", "s.t2", "s.t3",
+                   "sr.t1", "sr.t2", "sr.t3")], 
+           method = "spearman")
+```
+
+```{r}
+data.ci <-  cor.ci(data [,c("s.t1", "s.t2", "s.t3",
+                            "sr.t1", "sr.t2", "sr.t3")])
+```
+
+```{r}
+ci <- cor.plot.upperLowerCi(data.ci)
+```
+
+Confidence intervals in matrix form
+```{r}
+ci  
+```
+
+# H3 & H5: Mediation analysis basic psychological needs and self-reflection {.tabset}
+```{r}
+#Load packages
+
+library(lavaan)
+library(ggraph)
+library(knitr)
+library(ggplot2)
+library(semPlot)
+library(MVN)
+```
+
+## Assumptions T1
+```{r}
+#Create data frame with sem.t1 items
+
+data.sem.t1 = data.frame(data$s.t1, data$sr.t1, data$gbk.t1.s, data$age.t1,
+                         data$pol_orient.t1)
+```
+
+```{r}
+#Inspect data visually
+
+mvn(data = data.sem.t1, mvnTest = "royston", univariatePlot = "histogram")
+```
+
+```{r}
+#Check for overall multivariate normality (Doornik-Hansen's test) 
+
+result <- mvn(data = data.sem.t1, mvnTest = "dh")
+result$multivariateNormality
+```
+
+## Assumptions T2
+```{r}
+#Create data frame with sem.t2 items
+
+data.sem.t2 = data.frame(data$s.t2, data$sr.t2, data$gbk.t2.s, data$age.t2,
+                         data$pol_orient.t2, data$s.t1)
+```
+
+```{r}
+#Inspect data visually
+
+mvn(data = data.sem.t2, mvnTest = "royston", univariatePlot = "histogram") 
+```
+
+```{r}
+#Check for overall multivariate normality (Doornik-Hansen's test) 
+
+result <- mvn(data = data.sem.t2, mvnTest = "dh")
+result$multivariateNormality
+```
+
+## Assumptions T3
+```{r}
+#Create data frame with sem.t3 items
+
+data.sem.t3 = data.frame(data$s.t3, data$sr.t3, data$gbk.t3.s, data$age.t3,
+                         data$pol_orient.t3, data$s.t1, data$s.t2)
+```
+
+```{r}
+#Inspect data visually
+
+mvn(data = data.sem.t3, mvnTest = "royston", univariatePlot = "histogram") 
+```
+
+```{r}
+#Check for overall multivariate normality (Doornik-Hansen's test) 
+
+result <- mvn(data = data.sem.t3, mvnTest = "dh")
+result$multivariateNormality
+```
+
+## T1
+```{r}
+H23.k.t1 <- 's.t1 ~ sr.t1 + gbk.t1.s + age.t1 + gender.t1.d + pol_orient.t1
+             gbk.t1.s ~ sr.t1 + age.t1 + gender.t1.d + pol_orient.t1
+             sr.t1 ~ age.t1 + gender.t1.d + pol_orient.t1'
+
+fit.H23.k.t1 <- sem(H23.k.t1, data=data,  estimator = "MLM")
+summary(fit.H23.k.t1, fit.measures=TRUE, standardized=TRUE, rsquare=TRUE)
+```
+
+Modification indices
+```{r}
+mod_ind.H23.k.t1 <- modificationindices(fit.H23.k.t1)
+
+head(mod_ind.H23.k.t1[order(mod_ind.H23.k.t1$mi, decreasing=TRUE), ], 10)        
+
+subset(mod_ind.H23.k.t1[order(mod_ind.H23.k.t1$mi, decreasing=TRUE), ], mi > 5)  
+```
+
+Variance-Covariance-Matrix
+```{r}
+inspect(fit.H23.k.t1, "sampstat")$cov        #empircal
+fitted(fit.H23.k.t1)$cov                     #model-implicated
+```
+
+Standardized residuals
+```{r}
+cov_table.H23.k.t1 <- resid(fit.H23.k.t1, type="standardized")$cov
+
+cov_table.H23.k.t1[upper.tri(cov_table.H23.k.t1)] <- NA    
+diag(cov_table.H23.k.t1) <- NA                    
+
+kable(cov_table.H23.k.t1, digits=2)              
+```
+
+## T2
+```{r}
+H23.k.t2 <- 's.t2 ~ bed + sr.t2 + gbk.t2.s + s.t1 + age.t2 + gender.t2.d + pol_orient.t2
+             gbk.t2.s ~ bed + sr.t2 + age.t2 + gender.t2.d + pol_orient.t2
+                sr.t2 ~ bed + age.t2 + gender.t2.d + pol_orient.t2'
+
+fit.H23.k.t2 <- sem(H23.k.t2, data=data, estimator = "MLM")
+summary(fit.H23.k.t2, fit.measures=TRUE, standardized=TRUE, rsquare=TRUE)
+```
+
+Modification indices
+```{r}
+mod_ind.H23.k.t2 <- modificationindices(fit.H23.k.t2)
+
+head(mod_ind.H23.k.t2[order(mod_ind.H23.k.t2$mi, decreasing=TRUE), ], 10)        
+
+subset(mod_ind.H23.k.t2[order(mod_ind.H23.k.t2$mi, decreasing=TRUE), ], mi > 5)  
+```
+
+Variance-Covariance-Matrix
+```{r}
+inspect(fit.H23.k.t2, "sampstat")$cov        #empirical
+fitted(fit.H23.k.t2)$cov                     #model-implicated
+```
+
+Standardized residuals
+```{r}
+cov_table.H23.k.t2 <- resid(fit.H23.k.t2, type="standardized")$cov
+
+cov_table.H23.k.t2[upper.tri(cov_table.H23.k.t2)] <- NA    
+diag(cov_table.H23.k.t2) <- NA                  
+
+kable(cov_table.H23.k.t2, digits=2)             
+```
+
+## T3
+```{r}
+H23.k.t3 <- 's.t3 ~ bed + sr.t3 + gbk.t3.s + s.t1 + s.t2 + age.t3 + gender.t3.d + pol_orient.t3
+             gbk.t3.s ~ bed + sr.t3 + age.t3 + gender.t3.d + pol_orient.t3
+             sr.t3 ~ bed + age.t3 + gender.t3.d + pol_orient.t3'
+
+fit.H23.k.t3 <- sem(H23.k.t3, data=data, estimator = "MLM")
+summary(fit.H23.k.t3, fit.measures=TRUE, standardized=TRUE, rsquare=TRUE)
+```
+
+Modification indices
+```{r}
+mod_ind.H23.k.t3 <- modificationindices(fit.H23.k.t3)
+
+head(mod_ind.H23.k.t3[order(mod_ind.H23.k.t3$mi, decreasing=TRUE), ], 10)       
+
+subset(mod_ind.H23.k.t3[order(mod_ind.H23.k.t3$mi, decreasing=TRUE), ], mi > 5) 
+```
+
+Variance-Covariance-Matrix
+```{r}
+inspect(fit.H23.k.t3, "sampstat")$cov        #empirical
+fitted(fit.H23.k.t3)$cov                     #model-implicated
+```
+
+Standardized residuals
+```{r}
+cov_table.H23.k.t3 <- resid(fit.H23.k.t3, type="standardized")$cov
+
+cov_table.H23.k.t3[upper.tri(cov_table.H23.k.t3)] <- NA    
+diag(cov_table.H23.k.t3) <- NA                    
+
+kable(cov_table.H23.k.t3, digits=2)              
+```
+
+## Splitting overall needs into autonomy and competence {.tabset}
+### Assumptions T1 AC
+```{r}
+#Create data frame with sem.t1 items
+
+data.sem.t1 = data.frame(data$s.t1, data$sr.t1, data$gbk.t1.a, data$gbk.t1.c, data$age.t1,
+                         data$pol_orient.t1)
+```
+
+```{r}
+#Inspect data visually
+
+mvn(data = data.sem.t1, mvnTest = "royston", univariatePlot = "histogram") 
+```
+
+```{r}
+#Check for overall multivariate normality (Doornik-Hansen's test) 
+
+result <- mvn(data = data.sem.t1, mvnTest = "dh")
+result$multivariateNormality
+```
+
+### Assumptions T2 AC
+```{r}
+#Create data frame with sem.t2 items
+
+data.sem.t2 = data.frame(data$s.t2, data$sr.t2, data$gbk.t2.a, data$gbk.t2.c, data$age.t2,
+                         data$pol_orient.t2, data$s.t1)
+```
+
+```{r}
+#Inspect data visually
+
+mvn(data = data.sem.t2, mvnTest = "royston", univariatePlot = "histogram") 
+```
+
+```{r}
+#Check for overall multivariate normality (Doornik-Hansen's test) 
+
+result <- mvn(data = data.sem.t2, mvnTest = "dh")
+result$multivariateNormality
+```
+
+### Assumptions T3 AC
+```{r}
+#Create data frame with sem.t3 items
+
+data.sem.t3 = data.frame(data$s.t3, data$sr.t3, data$gbk.t3.a, data$gbk.t3.c, data$age.t3,
+                         data$pol_orient.t3, data$s.t1, data$s.t2)
+```
+
+```{r}
+#Inspect data visually
+
+mvn(data = data.sem.t3, mvnTest = "royston", univariatePlot = "histogram")
+```
+
+```{r}
+#Check for overall multivariate normality (Doornik-Hansen's test) 
+
+result <- mvn(data = data.sem.t3, mvnTest = "dh")
+result$multivariateNormality
+```
+
+### T1 AC
+```{r}
+H23.k.t1 <- 's.t1 ~ sr.t1 + gbk.t1.a + gbk.t1.c + age.t1 + gender.t1.d + pol_orient.t1
+             gbk.t1.a ~ sr.t1 + age.t1 + gender.t1.d + pol_orient.t1
+             gbk.t1.c ~ sr.t1 + age.t1 + gender.t1.d + pol_orient.t1
+             sr.t1 ~ age.t1 + gender.t1.d + pol_orient.t1'
+
+fit.H23.k.t1 <- sem(H23.k.t1, data=data,  estimator = "MLM")
+summary(fit.H23.k.t1, fit.measures=TRUE, standardized=TRUE, rsquare=TRUE)
+```
+
+Modification indices
+```{r}
+mod_ind.H23.k.t1 <- modificationindices(fit.H23.k.t1)
+
+head(mod_ind.H23.k.t1[order(mod_ind.H23.k.t1$mi, decreasing=TRUE), ], 10)    
+
+subset(mod_ind.H23.k.t1[order(mod_ind.H23.k.t1$mi, decreasing=TRUE), ], mi > 5) 
+```
+
+Variance-Covariance-Matrix
+```{r}
+inspect(fit.H23.k.t1, "sampstat")$cov        #empirical
+fitted(fit.H23.k.t1)$cov                     #model-implicated
+```
+
+Standardized residuals
+```{r}
+cov_table.H23.k.t1 <- resid(fit.H23.k.t1, type="standardized")$cov
+
+cov_table.H23.k.t1[upper.tri(cov_table.H23.k.t1)] <- NA   
+diag(cov_table.H23.k.t1) <- NA                 
+
+kable(cov_table.H23.k.t1, digits=2)             
+```
+
+### T2 AC
+```{r}
+H23.k.t2 <- 's.t2 ~ bed + sr.t2 + gbk.t2.a + gbk.t2.c + s.t1 + age.t2 + gender.t2.d + pol_orient.t2
+             gbk.t2.a ~ bed + sr.t2 + age.t2 + gender.t2.d + pol_orient.t2
+             gbk.t2.c ~ bed + sr.t2 + age.t2 + gender.t2.d + pol_orient.t2
+             sr.t2 ~ bed + age.t2 + gender.t2.d + pol_orient.t2'
+
+fit.H23.k.t2 <- sem(H23.k.t2, data=data, estimator = "MLM")
+summary(fit.H23.k.t2, fit.measures=TRUE, standardized=TRUE, rsquare=TRUE)
+```
+
+Modification indices
+```{r}
+mod_ind.H23.k.t2 <- modificationindices(fit.H23.k.t2)
+
+head(mod_ind.H23.k.t2[order(mod_ind.H23.k.t2$mi, decreasing=TRUE), ], 10)     
+
+subset(mod_ind.H23.k.t2[order(mod_ind.H23.k.t2$mi, decreasing=TRUE), ], mi > 5) 
+```
+
+Variance-Covariance-Matrix
+```{r}
+inspect(fit.H23.k.t2, "sampstat")$cov        #empirical
+fitted(fit.H23.k.t2)$cov                     #model-implicated
+```
+
+Standardized residuals
+```{r}
+cov_table.H23.k.t2 <- resid(fit.H23.k.t2, type="standardized")$cov
+
+cov_table.H23.k.t2[upper.tri(cov_table.H23.k.t2)] <- NA    
+diag(cov_table.H23.k.t2) <- NA                    
+
+kable(cov_table.H23.k.t2, digits=2)              
+```
+
+### T3 AC
+```{r}
+H23.k.t3 <- 's.t3 ~ bed + sr.t3 + gbk.t3.a + gbk.t3.c + s.t1 + s.t2 + age.t3 + gender.t3.d + pol_orient.t3
+             gbk.t3.a ~ bed + sr.t3 + age.t3 + gender.t3.d + pol_orient.t3
+             gbk.t3.c ~ bed + sr.t3 + age.t3 + gender.t3.d + pol_orient.t3
+             sr.t3 ~ bed + age.t3 + gender.t3.d + pol_orient.t3'
+
+fit.H23.k.t3 <- sem(H23.k.t3, data=data, estimator = "MLM")
+summary(fit.H23.k.t3, fit.measures=TRUE, standardized=TRUE, rsquare=TRUE)
+```
+
+Modification indices
+```{r}
+mod_ind.H23.k.t3 <- modificationindices(fit.H23.k.t3)
+
+head(mod_ind.H23.k.t3[order(mod_ind.H23.k.t3$mi, decreasing=TRUE), ], 10)   
+
+subset(mod_ind.H23.k.t3[order(mod_ind.H23.k.t3$mi, decreasing=TRUE), ], mi > 5) 
+```
+
+Variance-Covariance-Matrix
+```{r}
+inspect(fit.H23.k.t3, "sampstat")$cov        #empirical
+fitted(fit.H23.k.t3)$cov                     #model-implicated
+```
+
+Standardized residuals
+```{r}
+cov_table.H23.k.t3 <- resid(fit.H23.k.t3, type="standardized")$cov
+
+cov_table.H23.k.t3[upper.tri(cov_table.H23.k.t3)] <- NA   
+diag(cov_table.H23.k.t3) <- NA                   
+
+kable(cov_table.H23.k.t3, digits=2)              
+```
+
+
+# H6: Sufficiency orientation predicts subjective well-being {.tabset}
+```{r}
+#Load packages
+
+library(psych)
+library(lm.beta)
+library(VIF)
+```
+
+## Correlations
+```{r}
+corr.test (data[,c("swb.t1", "swb.t2", "swb.t3",
+                   "s.t1", "s.t2", "s.t3")], 
+           method = "spearman")
+```
+
+```{r}
+data.ci <-  cor.ci(data [,c("swb.t1", "swb.t2", "swb.t3",
+                            "s.t1", "s.t2", "s.t3")])
+```
+
+```{r}
+ci <- cor.plot.upperLowerCi(data.ci)  
+```
+
+Confidence intervals in matrix form
+```{r}
+ci
+```
+
+## Regressions T1 {.tabset}
+### Step 1
+```{r}
+Regression.swb.k <- lm(swb.t1 ~ age.t1 + gender.t1.d + pol_orient.t1, data = data)                
+summary(Regression.swb.k)
+lm.beta(Regression.swb.k)
+confint(lm.beta(Regression.swb.k), level = 0.95)
+
+
+res.lm <- residuals(Regression.swb.k)
+describe (res.lm)
+shapiro.test(res.lm)
+
+dwt(lm(swb.t1 ~ age.t1 + gender.t1.d + pol_orient.t1, data = data))
+
+method=c("resample","normal")
+
+par(mfrow = c(2, 2)) 
+plot(Regression.swb.k)       
+par(mfrow = c(1, 1)) 
+car::vif(Regression.swb.k) 
+
+```
+
+### Step 2
+```{r}
+Regression.swb.k2 <- lm(swb.t1 ~ age.t1 + gender.t1.d + pol_orient.t1 + s.t1, data = data)   
+summary(Regression.swb.k2)
+lm.beta(Regression.swb.k2)
+confint(lm.beta(Regression.swb.k2), level = 0.95)
+
+res.lm <- residuals(Regression.swb.k2) 
+describe (res.lm)
+shapiro.test(res.lm)
+
+dwt(lm(swb.t1 ~ age.t1 + gender.t1.d + pol_orient.t1 + s.t1, data = data))
+
+
+par(mfrow = c(2, 2)) 
+plot(Regression.swb.k2)   
+par(mfrow = c(1, 1)) 
+car::vif(Regression.swb.k2)
+```
+
+### Comparing models
+```{r}
+anova(Regression.swb.k, Regression.swb.k2)
+```
+
+## Regressions T2 {.tabset}
+### Step 1
+```{r}
+Regression.swb.k.t2 <- lm(swb.t2 ~ age.t2 + gender.t2.d + pol_orient.t2, data = data)                
+summary(Regression.swb.k.t2)
+lm.beta(Regression.swb.k.t2)
+confint(lm.beta(Regression.swb.k.t2), level = 0.95)
+
+res.lm <- residuals(Regression.swb.k.t2)
+describe (res.lm)
+shapiro.test(res.lm)
+dwt(lm(swb.t2 ~ age.t2 + gender.t2.d + pol_orient.t2, data = data))
+
+par(mfrow = c(2, 2)) 
+plot(Regression.swb.k.t2)    
+par(mfrow = c(1, 1)) 
+car::vif(Regression.swb.k.t2)
+```
+
+### Step 2
+```{r}
+Regression.swb.k2.t2 <- lm(swb.t2 ~ age.t2 + gender.t2.d + pol_orient.t2 + s.t2, data = data)   
+summary(Regression.swb.k2.t2)
+lm.beta(Regression.swb.k2.t2)
+confint(lm.beta(Regression.swb.k2.t2), level = 0.95)
+
+res.lm <- residuals(Regression.swb.k2.t2) 
+describe (res.lm)
+shapiro.test(res.lm) 
+dwt(lm(swb.t2 ~ age.t2 + gender.t2.d + pol_orient.t2 + s.t2, data = data))
+
+
+par(mfrow = c(2, 2)) 
+plot(Regression.swb.k2.t2)      
+par(mfrow = c(1, 1))  
+car::vif(Regression.swb.k2.t2) 
+```
+
+### Comparing models
+```{r}
+anova(Regression.swb.k.t2, Regression.swb.k2.t2)
+```
+
+## Regressions T3 {.tabset}
+### Step 1
+```{r}
+Regression.swb.k.t3 <- lm(swb.t3 ~ age.t3 + gender.t3.d + pol_orient.t3, data = data)                
+summary(Regression.swb.k.t3)
+lm.beta(Regression.swb.k.t3)
+confint(lm.beta(Regression.swb.k.t3), level = 0.95)
+
+res.lm <- residuals(Regression.swb.k.t3)
+describe (res.lm)
+shapiro.test(res.lm)
+dwt(lm(swb.t3 ~ age.t3 + gender.t3.d + pol_orient.t3, data = data))
+
+
+par(mfrow = c(2, 2)) 
+plot(Regression.swb.k.t3)       
+par(mfrow = c(1, 1)) 
+car::vif(Regression.swb.k.t3)
+```
+
+### Step 2
+```{r}
+Regression.swb.k2.t3 <- lm(swb.t3 ~ age.t3 + gender.t3.d + pol_orient.t3 + s.t3, data = data)   
+summary(Regression.swb.k2.t3)
+lm.beta(Regression.swb.k2.t3)
+confint(lm.beta(Regression.swb.k2.t3), level = 0.95)
+
+
+res.lm <- residuals(Regression.swb.k2.t3) 
+
+describe (res.lm)
+shapiro.test(res.lm)
+dwt(lm(swb.t3 ~ age.t3 + gender.t3.d + pol_orient.t3 + s.t3, data = data))
+
+par(mfrow = c(2, 2)) 
+plot(Regression.swb.k2.t3)     
+par(mfrow = c(1, 1)) 
+car::vif(Regression.swb.k2.t3) 
+```
+
+### Comparing models
+```{r}
+anova(Regression.swb.k.t3, Regression.swb.k2.t3)
+```
+
+# H7: Moderation analysis time affluence predicts sufficiency orientation {.tabset}
+## Correlations
+```{r}
+corr.test (data[,c("t.t1", "t.t2", "t.t3",
+                   "s.t1", "s.t2", "s.t3")], 
+           method = "spearman")
+```
+
+```{r}
+data.ci <-  cor.ci(data [,c("t.t1", "t.t2", "t.t3",
+                            "s.t1", "s.t2", "s.t3")])
+```
+
+```{r}
+ci <- cor.plot.upperLowerCi(data.ci)  
+```
+
+Confidence intervals in matrix form
+```{r}
+ci
+```
+
+## T1 {.tabset}
+### Step 1
+```{r}
+Regression.s.k <- lm(s.t1 ~ age.t1 + gender.t1.d + pol_orient.t1, data = data)                
+summary(Regression.s.k)
+lm.beta(Regression.s.k)
+confint(lm.beta(Regression.s.k), level = 0.95)
+
+res.lm <- residuals(Regression.s.k) 
+describe (res.lm)
+shapiro.test(res.lm)
+dwt(lm(s.t1 ~ age.t1 + gender.t1.d + pol_orient.t1, data = data))
+
+
+par(mfrow = c(2, 2))  
+plot(Regression.s.k)     
+par(mfrow = c(1, 1)) 
+car::vif(Regression.s.k)
+```
+
+### Step 2
+```{r}
+Regression.s.k2 <- lm(s.t1 ~ age.t1 + gender.t1.d + pol_orient.t1 + t.t1, data = data)   
+summary(Regression.s.k2)
+lm.beta(Regression.s.k2)
+confint(lm.beta(Regression.s.k2), level = 0.95)
+
+res.lm <- residuals(Regression.s.k2) 
+describe (res.lm)
+shapiro.test(res.lm)
+dwt(lm(s.t1 ~ age.t1 + gender.t1.d + pol_orient.t1 + t.t1, data = data))
+
+par(mfrow = c(2, 2))  
+plot(Regression.s.k2)   
+par(mfrow = c(1, 1))  
+
+car::vif(Regression.s.k2) 
+```
+
+### Comparing models
+```{r}
+anova(Regression.s.k, Regression.s.k2)
+```
+
+## T2 {.tabset}
+### Step 1
+```{r}
+Regression.s.k.t2 <- lm(s.t2 ~ age.t2 + gender.t2.d + pol_orient.t2, data = data)                
+summary(Regression.s.k.t2)
+lm.beta(Regression.s.k.t2)
+confint(lm.beta(Regression.s.k.t2), level = 0.95)
+
+res.lm <- residuals(Regression.s.k.t2)
+describe (res.lm)
+shapiro.test(res.lm)
+dwt(lm(s.t2 ~ s.t1 + age.t2 + gender.t2.d + pol_orient.t2, data = data))
+
+
+
+par(mfrow = c(2, 2)) 
+plot(Regression.s.k.t2)      
+par(mfrow = c(1, 1))
+
+car::vif(Regression.s.k.t2) 
+```
+
+### Step 2
+```{r}
+Regression.s.k2.t2 <- lm(s.t2 ~ age.t2 + gender.t2.d + pol_orient.t2 + bed + t.t2, data = data)   
+summary(Regression.s.k2.t2)
+lm.beta(Regression.s.k2.t2)
+confint(lm.beta(Regression.s.k2.t2), level = 0.95)
+
+res.lm <- residuals(Regression.s.k2.t2)
+describe (res.lm)
+shapiro.test(res.lm)
+dwt(lm(s.t2 ~ s.t1 + age.t2 + gender.t2.d + pol_orient.t2 + bed + t.t2, data = data))
+
+
+
+par(mfrow = c(2, 2)) 
+plot(Regression.s.k2.t2)       
+par(mfrow = c(1, 1))  
+
+car::vif(Regression.s.k2.t2)
+```
+
+### Step 3
+```{r}
+Regression.s.k3.t2 <- lm(s.t2 ~ age.t2 + gender.t2.d + pol_orient.t2 + bed*t.t2, data = data)     
+summary(Regression.s.k3.t2)
+lm.beta(Regression.s.k3.t2)
+confint(lm.beta(Regression.s.k3.t2), level = 0.95)
+
+res.lm <- residuals(Regression.s.k3.t2) 
+describe (res.lm)
+shapiro.test(res.lm)
+dwt(lm(s.t2 ~ s.t1 + age.t2 + gender.t2.d + pol_orient.t2 + bed*t.t2, data = data))
+
+
+
+par(mfrow = c(2, 2)) 
+plot(Regression.s.k3.t2)       
+par(mfrow = c(1, 1))  
+
+car::vif(Regression.s.k3.t2) 
+
+
+# Plotting interaction  
+
+library(sjPlot)
+library(sjmisc)
+library(ggplot2)
+
+Regression.s.k3.t2 <- lm(s.t2 ~ age.t2 + gender.t2.d + pol_orient.t2 + t.t2*bed, data = data)
+plot_model(Regression.s.k3.t2, type = "int")
+
+
+```
+
+### Comparing models
+Step 1 vs. 2
+```{r}
+anova(Regression.s.k.t2, Regression.s.k2.t2)
+```
+
+Step 2 vs. 3
+```{r}
+anova(Regression.s.k2.t2, Regression.s.k3.t2)
+```
+
+Step 1 vs. 3
+```{r}
+anova(Regression.s.k.t2, Regression.s.k3.t2)
+```
+
+## T3 {.tabset}
+### Step 1
+```{r}
+Regression.s.k.t3 <- lm(s.t3 ~ age.t3 + gender.t3.d + pol_orient.t3, data = data)                
+summary(Regression.s.k.t3)
+lm.beta(Regression.s.k.t3)
+confint(lm.beta(Regression.s.k.t3), level = 0.95)
+
+res.lm <- residuals(Regression.s.k.t3) 
+describe (res.lm)
+shapiro.test(res.lm)
+dwt(lm(s.t3 ~ s.t1 + s.t2 + age.t3 + gender.t3.d + pol_orient.t3, data = data))
+
+
+
+par(mfrow = c(2, 2))  
+plot(Regression.s.k.t3)   
+par(mfrow = c(1, 1))  
+
+car::vif(Regression.s.k.t3) 
+```
+
+### Step 2
+```{r}
+Regression.s.k2.t3 <- lm(s.t3 ~ age.t3 + gender.t3.d + pol_orient.t3 + bed + t.t3, data = data)   
+summary(Regression.s.k2.t3)
+lm.beta(Regression.s.k2.t3)
+confint(lm.beta(Regression.s.k2.t3), level = 0.95)
+
+res.lm <- residuals(Regression.s.k2.t3) 
+describe (res.lm)
+shapiro.test(res.lm)
+dwt(lm(s.t3 ~ s.t1 + s.t2 + age.t3 + gender.t3.d + pol_orient.t3 + bed + t.t3, data = data))
+
+
+par(mfrow = c(2, 2)) 
+plot(Regression.s.k2.t3)         
+par(mfrow = c(1, 1))  
+
+car::vif(Regression.s.k2.t3)
+```
+
+### Step 3
+```{r}
+Regression.s.k3.t3 <- lm(s.t3 ~ age.t3 + gender.t3.d + pol_orient.t3 + bed*t.t3, data = data)   
+summary(Regression.s.k3.t3)
+lm.beta(Regression.s.k3.t3)
+confint(lm.beta(Regression.s.k3.t3), level = 0.95)
+
+res.lm <- residuals(Regression.s.k3.t3) 
+describe (res.lm)
+shapiro.test(res.lm)
+dwt(lm(s.t3 ~ s.t1 + s.t2 + age.t3 + gender.t3.d + pol_orient.t3 + bed*t.t3, data = data))
+
+
+par(mfrow = c(2, 2)) 
+plot(Regression.s.k3.t3)    
+par(mfrow = c(1, 1))  
+
+car::vif(Regression.s.k3.t3)
+
+# Plotting interaction 
+Regression.s.k3.t3 <- lm(s.t3 ~ age.t3 + gender.t3.d + pol_orient.t3 + t.t3*bed, data = data)   
+plot_model(Regression.s.k3.t3, type = "int")
+
+```
+
+### Comparing models
+Step 1 vs. 2
+```{r}
+anova(Regression.s.k.t3, Regression.s.k2.t3)
+```
+
+Step 2 vs. 3
+```{r}
+anova(Regression.s.k2.t3, Regression.s.k3.t3)
+```
+
+Step 1 vs. 3
+```{r}
+anova(Regression.s.k.t3, Regression.s.k3.t3)
+```
+
+# Pre-registered analyses {.tabset}
+## Pre-registered H1: ANCOVA
+```{r}
+result <- lm(s.t2~s.t1*bed,data = data)
+summary.aov(result)
+
+library(heplots) 
+etasq(result, type = 2, anova = TRUE)
+
+result <- lm(s.t3~s.t2*bed,data = data)
+summary.aov(result)
+etasq(result, type = 2, anova = TRUE)
+```
+
+## Pre-registered H2: t-Test T1 vs. T2 {.tabset}
+### Testing assumptions
+```{r}
+leveneTest(data$s.t1, data$s.t2, center=mean) 
+
+shapiro.test(data$s.t1)
+shapiro.test(data$s.t2)
+```
+
+### Paired samples t-test
+```{r}
+t.test(data$s.t1, data$s.t2, paired=TRUE)
+```
+
+### Wilcoxon test
+```{r}
+wilcox.test(data$s.t1,data$s.t2,paired=TRUE)
+```
+
+### Cohen's d
+```{r}
+library(effsize)
+library(car)
+cohen.d(data$s.t1,data$s.t2, na.rm = TRUE, paired=TRUE, pooled = TRUE, mu=0)
+```
+
+## Pre-registered H3: see H3 above
+
+## Pre-registered H4: see H5 above
+## Pre-registered H5: see H6 above
+## Pre-registered H6: see H7 above
+## Pre-registered H7: t-Test T2 vs. T3 {.tabset}
+### Testing assumptions
+```{r}
+leveneTest(data$s.t2, data$s.t3, center=mean) 
+
+shapiro.test(data$s.t2)
+shapiro.test(data$s.t3)
+```
+
+### Paired samples t-test
+```{r}
+t.test(data$s.t2, data$s.t3, paired=TRUE)
+```
+
+### Wilcoxon test
+```{r}
+wilcox.test(data$s.t2,data$s.t3,paired=TRUE)
+```
+
+### Cohen's d
+```{r}
+cohen.d(data$s.t2,data$s.t3, na.rm = TRUE, paired=TRUE, pooled = TRUE, mu=0)
+```
+
+
+# Comparing EG and CG at T1 {.tabset}
+## Testing assumptions
+```{r}
+leveneTest(data$swb.t1, data$bed, mean) 
+leveneTest(data$t.t1, data$bed, mean) 
+leveneTest(data$gbk.t1.s, data$bed, mean) 
+leveneTest(data$s.t1, data$bed, mean) 
+leveneTest(data$sr.t1, data$bed, mean) 
+leveneTest(data$age.t1, data$bed, mean) 
+leveneTest(data$pol_orient.t1, data$bed, mean)
+```
+
+## t-tests
+```{r}
+t.test(data$swb.t1 ~ data$bed)
+t.test(data$t.t1 ~ data$bed)
+t.test(data$gbk.t1.s ~ data$bed)
+t.test(data$s.t1 ~ data$bed)
+t.test(data$sr.t1 ~ data$bed)
+t.test(data$age.t1 ~ data$bed)
+t.test(data$pol_orient.t1 ~ data$bed)
+```
+
+## d-score
+```{r}
+library(lsr)
+cohensD(age.t1 ~ bed, data=data, method="pooled")
+```
+
+# Comparing completers vs. dropouts {.tabset}
+```{r}
+data$comp1 <- recode (data$ok.t2, 'NA=0; 1=1') #no participation at T2
+data$comp2 <- recode (data$ok.t3, 'NA=0; 1=1') #no participation at T3
+
+tabyl(data, comp1)
+tabyl(data, comp2)
+```
+
+## T2 {.tabset}
+### Testing assumptions
+```{r}
+leveneTest(data$swb.t1, data$comp1, mean) 
+leveneTest(data$t.t1, data$comp1, mean) 
+leveneTest(data$gbk.t1.s, data$comp1, mean) 
+leveneTest(data$s.t1, data$comp1, mean) 
+leveneTest(data$sr.t1, data$comp1, mean) 
+leveneTest(data$age.t1, data$comp1, mean) 
+leveneTest(data$pol_orient.t1, data$comp1, mean) 
+```
+
+### t-tests
+```{r}
+t.test(data$swb.t1 ~ data$comp1)
+t.test(data$t.t1 ~ data$comp1)
+t.test(data$gbk.t1.s ~ data$comp1)
+t.test(data$s.t1 ~ data$comp1)
+t.test(data$sr.t1 ~ data$comp1)
+t.test(data$age.t1 ~ data$comp1)
+t.test(data$pol_orient.t1 ~ data$comp1)
+```
+
+### Cohen's d
+```{r}
+cohensD(gbk.t1.s ~ comp1, data=data, method="pooled")
+```
+
+### Descriptives
+```{r}
+describeBy(data$gbk.t1.s, data$comp1, mat = TRUE)
+```
+
+## T3 {.tabset}
+### Testing assumptions
+```{r}
+leveneTest(data$swb.t2, data$comp2, mean) 
+leveneTest(data$t.t2, data$comp2, mean) 
+leveneTest(data$gbk.t2.s, data$comp2, mean) 
+leveneTest(data$s.t2, data$comp2, mean) 
+leveneTest(data$sr.t2, data$comp2, mean) 
+leveneTest(data$age.t2, data$comp2, mean) 
+leveneTest(data$pol_orient.t2, data$comp2, mean)
+```
+
+### t-tests
+```{r}
+t.test(data$swb.t2 ~ data$comp2)
+t.test(data$t.t2 ~ data$comp2)
+t.test(data$gbk.t2.s ~ data$comp2)
+t.test(data$s.t2 ~ data$comp2)
+t.test(data$sr.t2 ~ data$comp2)
+t.test(data$age.t2 ~ data$comp2)
+t.test(data$pol_orient.t2 ~ data$comp2)
+```

@@ -1,0 +1,792 @@
+---
+title: "Vorlesung"
+subtitle: "Statistik"
+author: "Samuel Merk"
+format: 
+  revealjs:
+    title-slide-attributes:
+      data-background-image: img/sash.svg
+      data-background-size: 30%
+      data-background-position: 0 0
+    slide-number: true
+    controls: true
+    logo: img/PHlogo.svg
+    theme: [dark, css/custom.scss]
+    chalkboard:
+      theme: whiteboard
+      boardmarker-width: 3
+      buttons: true
+      chalk-effect: 0
+    fullscreen: true
+    pdfexport: true
+bibliography: /Users/samuelmerk/Meine Ablage/Uni_gdrive/zotero-library/zotero_references.bib
+csl: /Users/samuelmerk/Meine Ablage/Uni_gdrive/zotero-library/apa.csl
+editor_options: 
+  chunk_output_type: console
+---
+
+
+## Mittelwertsvergleiche
+
+```{r hidden chunk which creates template stuff}
+#| echo: false
+
+## in terminal ########
+# quarto install extension quarto-ext/fontawesome
+# quarto install extension schochastics/academicons
+#
+
+########################
+library(fontawesome)
+library(tidyverse)
+set.seed(848265)
+
+# Change css to lecker PH green
+if(!dir.exists("img"))
+dir.create("img")
+if(!dir.exists("css"))
+dir.create("css")
+fileConn<-file("css/custom.scss")
+writeLines(c("/*-- scss:defaults --*/",
+             "$link-color: #8cd000 !default;",
+             ".imp {color: #8cd000;}"), fileConn)
+close(fileConn)
+
+# create sash with URL
+sash <- 
+  ggplot() + 
+  geom_polygon(data = tibble(x = c(0,4,5.5,0),
+                             y = c(1,5,5,-.5)),
+               aes(x,y), fill = "#8cd000") + 
+  coord_fixed() +
+  annotate(geom = "text", 
+           label = " www.ph-ka.de", 
+           x = .8, y = .8, 
+           angle = 45,
+           hjust = 0, vjust = 0,
+           size = 10,
+           color = "white") +
+ theme_void() + 
+ theme(plot.margin = margin(-2,0,0,-12, unit = "cm"))
+ggsave("img/sash.svg", sash)
+```
+
+
+## [{{< fa clipboard-list >}}]{.imp} Was haben wir heute vor? {.center}
+* Erweiterung,
+* Vertiefung und 
+* Übung von Mittelwertsvergleichen
+
+
+## [{{< fa binoculars >}}]{.imp} Was haben wir die letzen vier Sitzungen vor? {.smaller}
+
+* Heute: Mittelwertsvergleiche
+* 18.01.: Korrelationsanalayse
+* 25.01.: Lineares Modell I
+* 01.02.: Lineares Modell II
+
+## Big Picture {.center}
+```{mermaid}
+flowchart LR
+  A(Fragestellung) --> B(Stat. Hypothese)
+  B --> C(Test)
+  B --> Z([Effektstärke])
+  D(Annahmen) --> C
+  C --> E([p-Wert])
+  C --> F([BF])
+  
+style Z stroke:#8cd000,stroke-width:4px, color:#8cd000
+style E stroke:#8cd000,stroke-width:4px, color:#8cd000
+style F stroke:#8cd000,stroke-width:4px, color:#8cd000
+```
+
+## Beispiel: Bee Colony Loss {.center}
+```{mermaid}
+flowchart LR
+  A(Größerer Colony-Loss<br/>in Halbjahr 2?) --> B(H0: MW1 = MW2)
+  B --> C(t-Test für <br/>unabhängige Gruppen)
+  B --> Z([Cohen's d <br/> Vargha's A <br/> Cliff's d etc.])
+  D(Normalverteilung <br/>Varianzgleichheit <br/>Unabhängigkeit) --> C
+  C --> E([p-Wert])
+  C --> F([BF])
+  
+style Z stroke:#8cd000,stroke-width:4px, color:#8cd000
+style E stroke:#8cd000,stroke-width:4px, color:#8cd000
+style F stroke:#8cd000,stroke-width:4px, color:#8cd000
+```
+
+
+## Wie findet man passende Tests? {.smaller}
+* Übersichtsseiten in Lehrbüchern 
+<iframe src="Seiten aus Eid.pdf" height="500" width="990"></iframe>
+
+## Wie findet man passende Tests? {.smaller}
+* Übersichtsseiten in Softwaremanuals 
+<iframe src="Seiten aus JASP.pdf" height="500" width="990"></iframe>
+
+## Wie findet man passende Tests? {.smaller}
+* Expert\*innen
+
+
+## Unsere "kleine" Tabelle
+
+<font size="-2">
+
+| Anzahl der Gruppen (Stichproben) | $H_0:$                       | Annahmen                                                         | Test                                 | Effektstärke                                                           | Robustheit                                    |
+|----------------------------------|------------------------------|------------------------------------------------------------------|--------------------------------------|------------------------------------------------------------------------|-----------------------------------------------|
+| 2 unabh.                         | $MW_1 = MW_2$                | Intervallskalierte Variablen; Normalverteilung; Varianzgleichheit  | t-Test für unabh. Stichproben        | Vargha’s A; Cliff’s d;  Rangbiseriale Korrelation; Cohen’s d; Cohen’s $U_3$ | Robust bei Nichtnormalverteilung falls $N > 30$ |
+| 2 unabh.                         | $MW_1 = MW_2$                | Normalverteilung                                                 | Welch-Test                           | Vargha’s A; Cliff’s d;  Rangbiseriale Korrelation; Cohen’s d               | Robust bei Nichtnormalverteilung falls $N > 30$ |
+| 2 unabh.                         | $Mdn_1 = Mdn_2$              | Ordinalskalierte Variablen                                       | Wilcoxon-Rangsummen-Test aka. U-Test | Vargha’s A; Cliff’s d;  Rangbiseriale Korrelation                        |                                               |
+| 2 abh.                           | $MW_1 = MW_2$                | Normalverteilung der Paardifferenzen; Varianzgleichheit           | t-Test für abh. Stichproben          | Vargha’s A; Cliff’s d;  Rangbiseriale Korrelation; Cohen’s d               | Robust bei Nichtnormalverteilung falls $N > 30$ |
+| 2 abh.                           | $Mdn_1 = Mdn_2$              | Ordinalskalierte Variablen                                       | Wilcoxon-Vorzeichen-Rangtest         | Vargha’s A; Cliff’s d;  Rangbiseriale Korrelation                       |                                               |
+| > 2 unabh.                       | $MW_1 = MW_2 = MW_3 = …$     | Intervallskalierte Variablen; Normalverteilung; Varianzgleichheit  | ANOVA                                | $\eta^2$; $\eta_P^2$; $\omega^2$                                         |                                               |
+| > 2 unabh.                       | $Mdn_1 = Mdn_2 = Mdn_3 = …$ | Ordinalskalierte Variablen                                       | ANOVA                                | $\eta^2$                                                               |                                               |
+| > 2 abh.                         | $MW_1 = MW_2 = MW_3 = …$     | Intervallskalierte Variablen; Normalverteilung; Sphärizität        | Repeated Measurement ANOVA           | $\eta^2$; $\eta_P^2$; $\omega^2$; Kendall’s W                                         |                                               |
+| > 2 abh.                         | $Mdn_1 = Mdn_2 = Mdn_3 = …$ | Ordinalskalierte Variablen                                       | Friedman-Test                        | Kendall’s W                                                            |                                               |
+
+</font>
+
+## Übungsdaten: Tröger et al. 2020
+```{r}
+#| echo: false
+
+# Data cleaning
+## Loading packages I
+
+library(psych)
+library(dplyr)
+library(car)
+library(janitor)
+
+## T1
+### Loading data
+
+d1 <- read.csv("OrigFiles_Troeger_et_al_2022/Datasets/Pre.csv", header = TRUE, sep = ",")
+
+### Preparing the data
+
+length(unique(d1$case)) == nrow(d1)
+which(duplicated(d1$case)) 
+d2 <- d1[!duplicated(d1$case),] 
+d2.1 <- d1[duplicated(d1$case),] 
+which(d2$case == 103)
+d3 <- d2 [-c(103), ] 
+d4 <- subset(d3, case != "NA") 
+data <- d4
+
+### Define Missings 
+
+is.na(data$age.t1) <- which(data$age.t1== 0)
+
+### Calculating means T1
+#### Subjective well-being 
+# Inverting items
+
+data$swb7.t1.i <- recode (data$swb7.t1, '1=5; 2=4; 4=2; 5=1')
+data$swb8.t1.i <- recode (data$swb8.t1, '1=5; 2=4; 4=2; 5=1')
+data$swb9.t1.i <- recode (data$swb9.t1, '1=5; 2=4; 4=2; 5=1')
+data$swb10.t1.i <- recode (data$swb10.t1, '1=5; 2=4; 4=2; 5=1')
+data$swb11.t1.i <- recode (data$swb11.t1, '1=5; 2=4; 4=2; 5=1')
+data$swb12.t1.i <- recode (data$swb12.t1, '1=5; 2=4; 4=2; 5=1')
+
+#Calculating mean subjective well-being 
+
+data$swb.t1 <- rowMeans (data [c("swb1.t1", "swb2.t1", "swb3.t1", "swb4.t1", 
+                                 "swb5.t1", "swb6.t1", "swb7.t1.i", "swb8.t1.i",
+                                 "swb9.t1.i", "swb10.t1.i", "swb11.t1.i", "swb12.t1.i")]) 
+
+#### Time affluence 
+#Inverting items
+
+data$t1.t1.i <- recode (data$t1.t1, '1=5; 2=4; 4=2; 5=1')
+data$t3.t1.i <- recode (data$t3.t1, '1=5; 2=4; 4=2; 5=1')
+data$t6.t1.i <- recode (data$t6.t1, '1=5; 2=4; 4=2; 5=1')
+data$t8.t1.i <- recode (data$t8.t1, '1=5; 2=4; 4=2; 5=1')
+
+#Calculating mean time affluence
+
+data$t.t1 <- rowMeans (data [c("t1.t1.i", "t2.t1", "t3.t1.i", "t4.t1",
+                               "t5.t1", "t6.t1.i", "t7.t1", "t8.t1.i")])
+
+#### Basic psychological needs
+#Inverting items
+
+data$gbk16.t1.i <- recode (data$gbk16.t1, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk17.t1.i <- recode (data$gbk17.t1, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk18.t1.i <- recode (data$gbk18.t1, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+
+data$gbk3.t1.i <- recode (data$gbk3.t1, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk4.t1.i <- recode (data$gbk4.t1, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk5.t1.i <- recode (data$gbk5.t1, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+
+data$gbk8.t1.i <- recode (data$gbk8.t1, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk10.t1.i <- recode (data$gbk10.t1, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk11.t1.i <- recode (data$gbk11.t1, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+
+
+#Calculating means basic psychological needs
+
+data$gbk.t1.r <- rowMeans (data [c("gbk13.t1", "gbk14.t1", "gbk15.t1",
+                                   "gbk16.t1.i", "gbk17.t1.i", "gbk18.t1.i")]) #relatedness satisfaction
+
+data$gbk.t1.a <- rowMeans (data [c("gbk1.t1", "gbk2.t1", "gbk6.t1",
+                                   "gbk3.t1.i", "gbk4.t1.i", "gbk5.t1.i")])    #autonomy satisfaction
+
+data$gbk.t1.c <- rowMeans (data [c("gbk9.t1", "gbk12.t1",
+                                   "gbk8.t1.i", "gbk10.t1.i", "gbk11.t1.i")])  #competence satisfaction
+
+
+data$gbk.t1.s <- rowMeans (data [c("gbk13.t1", "gbk14.t1", "gbk15.t1",
+                               "gbk16.t1.i", "gbk17.t1.i", "gbk18.t1.i",
+                               "gbk1.t1", "gbk2.t1", "gbk6.t1",
+                               "gbk3.t1.i", "gbk4.t1.i", "gbk5.t1.i",
+                               "gbk9.t1", "gbk12.t1",
+                               "gbk8.t1.i", "gbk10.t1.i", "gbk11.t1.i")])      #basic needs satisfaction
+
+
+#### Sufficiency orientation
+#Inverting items
+
+data$so4.t1.i <- recode (data$so4.t1, '1=5; 2=4; 4=2; 5=1')
+
+
+#z-standardizing items
+
+data$sv1.t1.z <- scale(data$sv1.t1)
+data$sv2.t1.z <- scale(data$sv2.t1)
+data$sv3.t1.z <- scale(data$sv3.t1)
+data$sv4.t1.z <- scale(data$sv4.t1)
+data$sv5.t1.z <- scale(data$sv5.t1)
+data$sv6.t1.z <- scale(data$sv6.t1)
+data$sv12.t1.z <- scale(data$sv12.t1)
+data$sv13.t1.z <- scale(data$sv13.t1)
+data$sv14.t1.z <- scale(data$sv14.t1)
+data$sv15.t1.z <- scale(data$sv15.t1)
+data$sv16.t1.z <- scale(data$sv16.t1)
+data$sv17.t1.z <- scale(data$sv17.t1)
+data$sv18.t1.z <- scale(data$sv18.t1)
+
+data$so1.t1.z <- scale(data$so1.t1)
+data$so2.t1.z <- scale(data$so2.t1)
+data$so3.t1.z <- scale(data$so3.t1)
+data$so4.t1.i.z <- scale(data$so4.t1.i)
+data$so5.t1.z <- scale(data$so5.t1)
+data$so6.t1.z <- scale(data$so6.t1)
+data$so7.t1.z <- scale(data$so7.t1)
+data$so8.t1.z <- scale(data$so8.t1)
+data$so9.t1.z <- scale(data$so9.t1)
+data$so10.t1.z <- scale(data$so10.t1)
+data$so11.t1.z <- scale(data$so11.t1)
+data$so12.t1.z <- scale(data$so12.t1)
+data$so13.t1.z <- scale(data$so13.t1)
+
+
+#Calculating mean sufficiency orientation
+
+data$s.t1 <- rowMeans (data [c("so1.t1.z", "so2.t1.z", "so4.t1.i.z", "so5.t1.z",
+                               "so6.t1.z", "so8.t1.z", "so9.t1.z", "so10.t1.z",
+                               "so11.t1.z", "so12.t1.z", "so13.t1.z",
+                               "sv1.t1.z", "sv2.t1.z", "sv3.t1.z", "sv4.t1.z",
+                               "sv5.t1.z", "sv6.t1.z",
+                               "sv12.t1.z", "sv13.t1.z", "sv14.t1.z", "sv15.t1.z",
+                               "so7.t1.z",
+                               "sv16.t1.z", "sv17.t1.z", "sv18.t1.z", "so3.t1.z")])
+
+
+#### Self-reflection
+
+data$sr.t1 <- rowMeans (data [c("sr1.t1", "sr2.t1", "sr3.t1", "sr4.t1",
+                                "sr5.t1", "sr7.t1")]) 
+
+
+#### Standardized scales T1
+
+# Sufficiency orientation
+data$s.t1.z <- scale(data [,"s.t1"])
+
+# Subjective wellbeing
+data$swb.t1.z <- scale(data [,"swb.t1"])
+
+# Basic psychological needs
+data$gbk.t1.s.z <- scale(data [,"gbk.t1.s"])
+
+# Time affluence
+data$t.t1.z <- scale(data [,"t.t1"])
+
+# Self-reflection
+data$sr.t1.z <- scale(data [,"sr.t1"])
+
+
+### Calculating outliers T1
+
+d.t1 <- filter (data, ok.t1 == 1 & dauer.t1 > 0 & (check.t1 == 4 | is.na(check.t1))) 
+
+d.t1.a <- filter(d.t1, s.t1.z <= 2.5 & s.t1.z >= (-2.5)
+                & swb.t1.z <= 2.5 & swb.t1.z >= (-2.5)
+                & gbk.t1.s.z  <= 2.5 & gbk.t1.s.z >= (-2.5) 
+                & t.t1.z  <= 2.5 & t.t1.z >= (-2.5)
+                & sr.t1.z <= 2.5 & sr.t1.z >= (-2.5))
+
+
+### Renaming dataset T1
+
+table_pre <- d.t1.a
+
+
+## T2
+### Loading data
+
+table1 <- read.csv("OrigFiles_Troeger_et_al_2022/Datasets/EG_Post.csv", header = TRUE, sep = ",")
+table2 <- read.csv("OrigFiles_Troeger_et_al_2022/Datasets/CG_Post.csv", header = TRUE, sep = ",")
+table3 <- read.csv("OrigFiles_Troeger_et_al_2022/Datasets/Check.csv", header = TRUE, sep = ";")
+
+
+### Merging data
+
+d1 <- merge(table1, table2, all=TRUE) 
+d2 <- full_join(d1, table3, by = c ("case", "bed")) 
+
+
+### Preparing the data
+
+length(unique(d2$case)) == nrow(d2)
+which(duplicated(d2$case)) 
+d3 <- d2[!duplicated(d2$case),] 
+d3.1 <- d2[duplicated(d2$case),]
+d4 <- subset(d3, case != "NA") 
+data <- d4
+
+
+### Define Missings 
+
+is.na(data$age.t2) <- which(data$age.t2== 0) 
+
+
+### Calculating means T2
+#### Subjective well-being
+#Inverting items
+
+data$swb7.t2.i <- recode (data$swb7.t2, '1=5; 2=4; 4=2; 5=1')
+data$swb8.t2.i <- recode (data$swb8.t2, '1=5; 2=4; 4=2; 5=1')
+data$swb9.t2.i <- recode (data$swb9.t2, '1=5; 2=4; 4=2; 5=1')
+data$swb10.t2.i <- recode (data$swb10.t2, '1=5; 2=4; 4=2; 5=1')
+data$swb11.t2.i <- recode (data$swb11.t2, '1=5; 2=4; 4=2; 5=1')
+data$swb12.t2.i <- recode (data$swb12.t2, '1=5; 2=4; 4=2; 5=1')
+
+
+#Calculating mean subjective well-being
+
+data$swb.t2 <- rowMeans (data [c("swb1.t2", "swb2.t2", "swb3.t2", "swb4.t2", 
+                                 "swb5.t2", "swb6.t2", "swb7.t2.i", "swb8.t2.i",
+                                 "swb9.t2.i", "swb10.t2.i", "swb11.t2.i", "swb12.t2.i")]) 
+
+
+#### Time affluence
+#Inverting items
+
+data$t1.t2.i <- recode (data$t1.t2, '1=5; 2=4; 4=2; 5=1')
+data$t3.t2.i <- recode (data$t3.t2, '1=5; 2=4; 4=2; 5=1')
+data$t6.t2.i <- recode (data$t6.t2, '1=5; 2=4; 4=2; 5=1')
+data$t8.t2.i <- recode (data$t8.t2, '1=5; 2=4; 4=2; 5=1')
+
+
+#Calculating mean time affluence
+
+data$t.t2 <- rowMeans (data [c("t1.t2.i", "t2.t2", "t3.t2.i", "t4.t2",
+                               "t5.t2", "t6.t2.i", "t7.t2", "t8.t2.i")])
+
+
+#### Basic psychological needs
+#Inverting items
+
+data$gbk16.t2.i <- recode (data$gbk16.t2, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk17.t2.i <- recode (data$gbk17.t2, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk18.t2.i <- recode (data$gbk18.t2, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+
+data$gbk3.t2.i <- recode (data$gbk3.t2, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk4.t2.i <- recode (data$gbk4.t2, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk5.t2.i <- recode (data$gbk5.t2, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+
+data$gbk8.t2.i <- recode (data$gbk8.t2, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk10.t2.i <- recode (data$gbk10.t2, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk11.t2.i <- recode (data$gbk11.t2, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+
+
+#Calculating means basic psychological needs
+
+data$gbk.t2.r <- rowMeans (data [c("gbk13.t2", "gbk14.t2", "gbk15.t2",
+                                   "gbk16.t2.i", "gbk17.t2.i", "gbk18.t2.i")])   #relatedness satisfaction
+
+data$gbk.t2.a <- rowMeans (data [c("gbk1.t2", "gbk2.t2", "gbk6.t2",
+                                   "gbk3.t2.i", "gbk4.t2.i", "gbk5.t2.i")])    #autonomy satisfaction
+
+data$gbk.t2.c <- rowMeans (data [c("gbk9.t2", "gbk12.t2",
+                                   "gbk8.t2.i", "gbk10.t2.i", "gbk11.t2.i")])  #competence satisfaction
+
+
+data$gbk.t2.s <- rowMeans (data [c("gbk13.t2", "gbk14.t2", "gbk15.t2",
+                                   "gbk16.t2.i", "gbk17.t2.i", "gbk18.t2.i",
+                                   "gbk1.t2", "gbk2.t2", "gbk6.t2",
+                                   "gbk3.t2.i", "gbk4.t2.i", "gbk5.t2.i",
+                                   "gbk9.t2", "gbk12.t2",
+                                   "gbk8.t2.i", "gbk10.t2.i", "gbk11.t2.i")])  #basic needs satisfaction
+
+
+#### Sufficiency orientation
+#Inverting items
+
+data$so4.t2.i <- recode (data$so4.t2, '1=5; 2=4; 4=2; 5=1')
+
+
+#z-standardizing items
+
+data$sv1.t2.z <- scale(data$sv1.t2)
+data$sv2.t2.z <- scale(data$sv2.t2)
+data$sv3.t2.z <- scale(data$sv3.t2)
+data$sv4.t2.z <- scale(data$sv4.t2)
+data$sv5.t2.z <- scale(data$sv5.t2)
+data$sv6.t2.z <- scale(data$sv6.t2)
+data$sv12.t2.z <- scale(data$sv12.t2)
+data$sv13.t2.z <- scale(data$sv13.t2)
+data$sv14.t2.z <- scale(data$sv14.t2)
+data$sv15.t2.z <- scale(data$sv15.t2)
+data$sv16.t2.z <- scale(data$sv16.t2)
+data$sv17.t2.z <- scale(data$sv17.t2)
+data$sv18.t2.z <- scale(data$sv18.t2)
+
+data$so1.t2.z <- scale(data$so1.t2)
+data$so2.t2.z <- scale(data$so2.t2)
+data$so3.t2.z <- scale(data$so3.t2)
+data$so4.t2.i.z <- scale(data$so4.t2.i)
+data$so5.t2.z <- scale(data$so5.t2)
+data$so6.t2.z <- scale(data$so6.t2)
+data$so7.t2.z <- scale(data$so7.t2)
+data$so8.t2.z <- scale(data$so8.t2)
+data$so9.t2.z <- scale(data$so9.t2)
+data$so10.t2.z <- scale(data$so10.t2)
+data$so11.t2.z <- scale(data$so11.t2)
+data$so12.t2.z <- scale(data$so12.t2)
+data$so13.t2.z <- scale(data$so13.t2)
+
+
+#Calculating mean sufficiency orientation
+
+data$s.t2 <- rowMeans (data [c("so1.t2.z", "so2.t2.z", "so4.t2.i.z", "so5.t2.z",
+                               "so6.t2.z", "so8.t2.z", "so9.t2.z", "so10.t2.z",
+                               "so11.t2.z", "so12.t2.z", "so13.t2.z",
+                               "sv1.t2.z", "sv2.t2.z", "sv3.t2.z", "sv4.t2.z",
+                               "sv5.t2.z", "sv6.t2.z",
+                               "sv12.t2.z", "sv13.t2.z", "sv14.t2.z", "sv15.t2.z",
+                               "so7.t2.z",
+                               "sv16.t2.z", "sv17.t2.z", "sv18.t2.z", "so3.t2.z")])    
+
+
+#### Self-reflection
+
+data$sr.t2 <- rowMeans (data [c("sr1.t2", "sr2.t2", "sr3.t2", "sr4.t2",
+                                "sr5.t2", "sr7.t2")]) 
+
+
+#### Standardized scales T2
+
+# Sufficiency orientation
+data$s.t2.z <- scale(data [,"s.t2"])
+
+# Subjective wellbeing
+data$swb.t2.z <- scale(data [,"swb.t2"])
+
+# Basiy psychological needs
+data$gbk.t2.s.z <- scale(data [,"gbk.t2.s"])
+
+# Time affluence
+data$t.t2.z <- scale(data [,"t.t2"])
+
+# Self-reflection
+data$sr.t2.z <- scale(data [,"sr.t2"])
+
+
+### Calculating outliers
+
+d.t2 <- filter(data, ok.t2 == 1 & dauer.t2 > 0 & sumcheck > 3 & (check.t2 == 4 | is.na(check.t2))) 
+
+d.t2.a <- filter(d.t2, s.t2.z <= 2.5 & s.t2.z >= (-2.5)
+                & swb.t2.z <= 2.5 & swb.t2.z >= (-2.5) 
+                & gbk.t2.s.z  <= 2.5 & gbk.t2.s.z >= (-2.5) 
+                & t.t2.z  <= 2.5 & t.t2.z >= (-2.5)
+                & sr.t2.z  <= 2.5 & sr.t2.z >= (-2.5)) 
+
+
+### Renaming dataset T2
+
+table_post <- d.t2.a
+
+
+## T3
+### Loading data
+
+d1 <- read.csv("OrigFiles_Troeger_et_al_2022/Datasets/FollowUp.csv", header = TRUE, sep = ",")
+
+
+### Preparing the data
+
+length(unique(d1$case)) == nrow(d1)
+which(duplicated(d1$case)) 
+d2 <- d1[!duplicated(d1$case),] 
+d2.1 <- d1[duplicated(d1$case),]
+d3 <- subset(d2, case != "NA")
+data <- d3
+
+
+### Define Missings 
+
+is.na(data$age.t3) <- which(data$age.t3== 0)
+
+
+### Calculating means T3
+#### Subjective well-being
+#Inverting items
+
+data$swb7.t3.i <- recode (data$swb7.t3, '1=5; 2=4; 4=2; 5=1')
+data$swb8.t3.i <- recode (data$swb8.t3, '1=5; 2=4; 4=2; 5=1')
+data$swb9.t3.i <- recode (data$swb9.t3, '1=5; 2=4; 4=2; 5=1')
+data$swb10.t3.i <- recode (data$swb10.t3, '1=5; 2=4; 4=2; 5=1')
+data$swb11.t3.i <- recode (data$swb11.t3, '1=5; 2=4; 4=2; 5=1')
+data$swb12.t3.i <- recode (data$swb12.t3, '1=5; 2=4; 4=2; 5=1')
+
+
+#Calculating mean subjective well-being
+
+data$swb.t3 <- rowMeans (data [c("swb1.t3", "swb2.t3", "swb3.t3", "swb4.t3", 
+                                 "swb5.t3", "swb6.t3", "swb7.t3.i", "swb8.t3.i",
+                                 "swb9.t3.i", "swb10.t3.i", "swb11.t3.i", "swb12.t3.i")]) 
+
+
+#### Time affluence
+#Inverting items
+
+data$t1.t3.i <- recode (data$t1.t3, '1=5; 2=4; 4=2; 5=1')
+data$t3.t3.i <- recode (data$t3.t3, '1=5; 2=4; 4=2; 5=1')
+data$t6.t3.i <- recode (data$t6.t3, '1=5; 2=4; 4=2; 5=1')
+data$t8.t3.i <- recode (data$t8.t3, '1=5; 2=4; 4=2; 5=1')
+
+
+#Calculating mean time affluence
+
+data$t.t3 <- rowMeans (data [c("t1.t3.i", "t2.t3", "t3.t3.i", "t4.t3",
+                               "t5.t3", "t6.t3.i", "t7.t3", "t8.t3.i")])
+
+
+#### Basic psychological needs
+#Inverting items
+
+data$gbk16.t3.i <- recode (data$gbk16.t3, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk17.t3.i <- recode (data$gbk17.t3, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk18.t3.i <- recode (data$gbk18.t3, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+
+data$gbk3.t3.i <- recode (data$gbk3.t3, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk4.t3.i <- recode (data$gbk4.t3, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk5.t3.i <- recode (data$gbk5.t3, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+
+data$gbk8.t3.i <- recode (data$gbk8.t3, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk10.t3.i <- recode (data$gbk10.t3, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+data$gbk11.t3.i <- recode (data$gbk11.t3, '1=7; 2=6; 3=5; 5=3; 6=2; 7=1')
+
+
+#Calculating means basic psychological needs
+
+data$gbk.t3.r <- rowMeans (data [c("gbk13.t3", "gbk14.t3", "gbk15.t3",
+                                   "gbk16.t3.i", "gbk17.t3.i", "gbk18.t3.i")])   #relatedness satisfaction
+
+data$gbk.t3.a <- rowMeans (data [c("gbk1.t3", "gbk2.t3", "gbk6.t3",
+                                   "gbk3.t3.i", "gbk4.t3.i", "gbk5.t3.i")])    #autonomy satisfaction
+
+data$gbk.t3.c <- rowMeans (data [c("gbk9.t3", "gbk12.t3",
+                                   "gbk8.t3.i", "gbk10.t3.i", "gbk11.t3.i")])  #competence satisfaction
+
+
+data$gbk.t3.s <- rowMeans (data [c("gbk13.t3", "gbk14.t3", "gbk15.t3",
+                                   "gbk16.t3.i", "gbk17.t3.i", "gbk18.t3.i",
+                                   "gbk1.t3", "gbk2.t3", "gbk6.t3",
+                                   "gbk3.t3.i", "gbk4.t3.i", "gbk5.t3.i",
+                                   "gbk9.t3", "gbk12.t3",
+                                   "gbk8.t3.i", "gbk10.t3.i", "gbk11.t3.i")])  #basic needs satisfaction
+
+
+#### Sufficiency orientation
+#Inverting items
+
+data$so4.t3.i <- recode (data$so4.t3, '1=5; 2=4; 4=2; 5=1')
+
+
+#z-standardizing items
+
+data$sv1.t3.z <- scale(data$sv1.t3)
+data$sv2.t3.z <- scale(data$sv2.t3)
+data$sv3.t3.z <- scale(data$sv3.t3)
+data$sv4.t3.z <- scale(data$sv4.t3)
+data$sv5.t3.z <- scale(data$sv5.t3)
+data$sv6.t3.z <- scale(data$sv6.t3)
+data$sv12.t3.z <- scale(data$sv12.t3)
+data$sv13.t3.z <- scale(data$sv13.t3)
+data$sv14.t3.z <- scale(data$sv14.t3)
+data$sv15.t3.z <- scale(data$sv15.t3)
+data$sv16.t3.z <- scale(data$sv16.t3)
+data$sv17.t3.z <- scale(data$sv17.t3)
+data$sv18.t3.z <- scale(data$sv18.t3)
+
+data$so1.t3.z <- scale(data$so1.t3)
+data$so2.t3.z <- scale(data$so2.t3)
+data$so3.t3.z <- scale(data$so3.t3)
+data$so4.t3.i.z <- scale(data$so4.t3.i)
+data$so5.t3.z <- scale(data$so5.t3)
+data$so6.t3.z <- scale(data$so6.t3)
+data$so7.t3.z <- scale(data$so7.t3)
+data$so8.t3.z <- scale(data$so8.t3)
+data$so9.t3.z <- scale(data$so9.t3)
+data$so10.t3.z <- scale(data$so10.t3)
+data$so11.t3.z <- scale(data$so11.t3)
+data$so12.t3.z <- scale(data$so12.t3)
+data$so13.t3.z <- scale(data$so13.t3)
+
+
+#Calculating mean sufficiency orientation
+
+data$s.t3 <- rowMeans (data [c("so1.t3.z", "so2.t3.z", "so4.t3.i.z", "so5.t3.z",
+                               "so6.t3.z", "so8.t3.z", "so9.t3.z", "so10.t3.z",
+                               "so11.t3.z", "so12.t3.z", "so13.t3.z",
+                               "sv1.t3.z", "sv2.t3.z", "sv3.t3.z", "sv4.t3.z",
+                               "sv5.t3.z", "sv6.t3.z",
+                               "sv12.t3.z", "sv13.t3.z", "sv14.t3.z", "sv15.t3.z",
+                               "so7.t3.z",
+                               "sv16.t3.z", "sv17.t3.z", "sv18.t3.z", "so3.t3.z")])
+
+
+#### Self-reflection
+
+data$sr.t3 <- rowMeans (data [c("sr1.t3", "sr2.t3", "sr3.t3", "sr4.t3",
+                                "sr5.t3", "sr7.t3")]) 
+
+
+#### Standardized scales T3
+
+# Sufficiency orientation
+data$s.t3.z <- scale(data [,"s.t3"])
+
+# Subjective well-being
+data$swb.t3.z <- scale(data [,"swb.t3"])
+
+# Basic psychological needs
+data$gbk.t3.s.z <- scale(data [,"gbk.t3.s"])
+
+# Time affluence
+data$t.t3.z <- scale(data [,"t.t3"])
+
+# Self-reflection
+data$sr.t3.z <- scale(data [,"sr.t3"])
+
+
+### Calculating outliers T3
+
+d.t3 <- filter(data, ok.t3 == 1 & dauer.t3 > 0 & (check.t3 == 4 | is.na(check.t3)))
+
+d.t3.a <- filter(d.t3, s.t3.z <= 2.5 & s.t3.z >= (-2.5)
+                & swb.t3.z <= 2.5 & swb.t3.z >= (-2.5) 
+                & gbk.t3.s.z <= 2.5 & gbk.t3.s.z >= (-2.5) 
+                & t.t3.z <= 2.5 & t.t3.z >= (-2.5)
+                & sr.t3.z <= 2.5 & sr.t3.z >= (-2.5)) 
+
+
+### Renaming dataset T3
+
+table_fu <- d.t3.a
+
+
+## Combining datasets
+#Combining T1 and T2
+
+table_pre_post <- full_join(table_pre, table_post, by = c ("case", "bed"))
+
+
+#Attaching T3
+
+d <- full_join(table_pre_post, table_fu, by = c ("case", "bed"))
+data <- d
+
+# MERK CODE ####################################################################
+# Computing Raw Scale  Scores
+
+data$s.t1.raw <- rowMeans (data [c("so1.t1", "so2.t1", "so4.t1.i", "so5.t1",
+                               "so6.t1", "so8.t1", "so9.t1", "so10.t1", 
+                               "so11.t1", "so12.t1", "so13.t1", "sv1.t1", 
+                               "sv2.t1", "sv3.t1", "sv4.t1", "sv5.t1", "sv6.t1",
+                               "sv12.t1", "sv13.t1", "sv14.t1", "sv15.t1",
+                               "so7.t1", "sv16.t1", "sv17.t1", "sv18.t1", 
+                               "so3.t1")])
+
+data$s.t2.raw <- rowMeans (data [c("so1.t2", "so2.t2", "so4.t2.i", "so5.t2",
+                               "so6.t2", "so8.t2", "so9.t2", "so10.t2", 
+                               "so11.t2", "so12.t2", "so13.t2", "sv1.t2", 
+                               "sv2.t2", "sv3.t2", "sv4.t2", "sv5.t2", "sv6.t2",
+                               "sv12.t2", "sv13.t2", "sv14.t2", "sv15.t2",
+                               "so7.t2", "sv16.t2", "sv17.t2", "sv18.t2", 
+                               "so3.t2")])
+
+data$s.t3.raw <- rowMeans (data [c("so1.t3", "so2.t3", "so4.t3.i", "so5.t3",
+                               "so6.t3", "so8.t3", "so9.t3", "so10.t3", 
+                               "so11.t3", "so12.t3", "so13.t3", "sv1.t3", 
+                               "sv2.t3", "sv3.t3", "sv4.t3", "sv5.t3", "sv6.t3",
+                               "sv12.t3", "sv13.t3", "sv14.t3", "sv15.t3",
+                               "so7.t3", "sv16.t3", "sv17.t3", "sv18.t3", 
+                               "so3.t3")])
+
+haven::write_sav(data, "data_troeger_etal.sav")
+```
+
+
+> Lesen Sie den Abstract auf [https://osf.io/ry8s2 {{< fa external-link >}}](https://osf.io/ry8s2){preview-link="true"}
+
+> Bewerten Sie gemeinsam mit einer/einem ihrer Lieblingskommiliton\*innen die *interne und externe Validität der Studie* sowie die *Konstruktvalidität* der Measurements sowiet anhand des Abstracts beurteilbar.
+
+## Übung 1: Randomization Check {.smaller}
+Prüfen Sie ob die Randomisierung wie gewünscht zwei vergleichbare Gruppen (Variable `bed`) generiert hat. Untersuchen Sie dazu die Variablen
+
+:::: {.columns}
+
+::: {.column width="40%"}
+* `pol_orient.t1` (*Man spricht in der Politik manchmal von "links" und "rechts". Wo würden Sie sich auf der folgenden Skala einordnen?*)
+    * 1 = "links"
+    * 2 = ...
+    * ...
+    * 100 = "rechts"
+:::
+
+::: {.column width="60%"}
+* `income.t1` (*Wie viel Geld haben Sie ungefähr monatlich für Ihren Lebensunterhalt zur Verfügung? Gemeint ist der Betrag, der sich aus allen Einkünften zusammensetzt und nach Abzug der Steuern und Sozialversicherungen übrig bleibt.*)
+    * 1	= weniger als 250 €
+    * 2	= 250€ bis unter 500€
+    * 3	= 500€ bis unter 1000€
+    * 4	= 1000€ bis unter 1500€
+    * 5	= 1500€ bis unter 2000€
+    * 6	= 2000€ bis unter 3000€
+    * 7	= 3000 € bis unter 4000€
+:::
+
+::::
+
+
+## Übung 2: Steigerung in I-Gruppe {.smaller}
+Prüfen Sie, ob die zentrale abhängige Variable *Sufficiency Orientation* (`s.t1.raw`, `s.t2.raw`, `s.t3.raw`) von der Intervention beeinflusst wird. Filtern Sie dazu den Datensatz so, dass er nur noch die Fälle der Interventionsgruppe enthält.
+
+* `s.t1.raw` 
+    * *Auch wenn ich mir ein Produkt finanziell leisten könnte, kaufe ich es nur dann, wenn ich das Produkt wirklich benötige*.
+        * 1	= stimme überhaupt  nicht zu, 2	= stimme nicht zu, 3 = stimme teilweise nicht zu, 4	= weder noch, 5	= stimme teilweise zu, 6 = stimme zu, 7 = stimme voll zu
+    * *Ich finde es erstrebenswert, nur wenige Dinge zu besitzen*.
+        * 1	= stimme überhaupt  nicht zu, 2	= stimme nicht zu, 3 = stimme teilweise nicht zu, 4	= weder noch, 5	= stimme teilweise zu, 6 = stimme zu, 7 = stimme voll zu
+    * ...
+        * ...
+
+
+## Übung 3: Interventionseffekt  {.smaller}
+Prüfen Sie, ob sich die zentrale abhängige Variable *Sufficiency Orientation* (`s.t2.raw`) nach der Intervention zwischen den Gruppen unterscheidet. 
+    
+
