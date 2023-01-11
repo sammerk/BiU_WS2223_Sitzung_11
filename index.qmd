@@ -118,11 +118,11 @@ style F stroke:#8cd000,stroke-width:4px, color:#8cd000
 
 ## Wie findet man passende Tests? {.smaller}
 * Übersichtsseiten in Lehrbüchern 
-<iframe src="Seiten aus Eid.pdf" height="500" width="990"></iframe>
+<iframe src="img/Seiten aus Eid.pdf" height="500" width="990"></iframe>
 
 ## Wie findet man passende Tests? {.smaller}
 * Übersichtsseiten in Softwaremanuals 
-<iframe src="Seiten aus JASP.pdf" height="500" width="990"></iframe>
+<iframe src="img/Seiten aus JASP.pdf" height="500" width="990"></iframe>
 
 ## Wie findet man passende Tests? {.smaller}
 * Expert\*innen
@@ -149,6 +149,7 @@ style F stroke:#8cd000,stroke-width:4px, color:#8cd000
 ## Übungsdaten: Tröger et al. 2020
 ```{r}
 #| echo: false
+#| results: hide
 
 # Data cleaning
 ## Loading packages I
